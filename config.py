@@ -34,3 +34,6 @@ Mapping = {
         "time": {"type": "double"}
     }}
 }
+
+
+FTP_BASE_PATH = "."
