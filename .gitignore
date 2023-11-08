@@ -1,0 +1,7 @@
+config.py
+databaseConfig.py
+
+.idea
+.venv
+/Docker/data/
+/Docker/certs/
