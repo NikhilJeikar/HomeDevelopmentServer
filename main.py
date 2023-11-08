@@ -1,8 +1,8 @@
 from fastapi import FastAPI, UploadFile, File
 from starlette.requests import Request
 
-from Handlers import ElasticLoginHandler
-from RequestModel import AccountLogin
+from auth.handler import ElasticLoginHandler
+from auth.model import AccountLogin
 from config import Elastic_Username, Elastic_Password
 
 app = FastAPI()
@@ -35,7 +35,3 @@ async def UpdatePassword(body: AccountLogin):
     return LoginHandle.IsUser(body.username)
 
 
-@app.post("/uploader")
-async def create_upload_file(path: str, file: UploadFile = File(...)):
-    print(path)
-    return {"filename": file.filename}

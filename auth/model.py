@@ -13,11 +13,3 @@ class AccountLogin(BaseModel):
             "password": self.password
         }
 
-
-class CreateSyncDeviceEntry(BaseModel):
-    username: str
-    device_id: str
-    device_name: str
-    time: float = time.time()
-
-
