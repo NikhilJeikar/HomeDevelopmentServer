@@ -3,7 +3,6 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
     container_name: ElasticDB
-    network_mode: "host"
     environment:
       node.name: es01
       cluster.name: $CLUSTER_NAME

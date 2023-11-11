@@ -1,6 +1,7 @@
 Indexes = {
     "Account": "account",
-    "Session": "session"
+    "Session": "session",
+    "Files": "files"
 }
 
 Mapping = {
@@ -13,11 +14,28 @@ Mapping = {
         "username": {"type": "keyword"},
         "session_token": {"type": "text"},
         "time": {"type": "double"},
-        "valid": {"type": "bool"},
+        "valid": {"type": "boolean"},
     }},
     "Log": {"properties": {
         "Component": {"type": "keyword"},
-        "Level": {"type": "number"},
+        "Level": {"type": "keyword"},
         "time": {"type": "double"}
-    }}
+    }},
+    "Files": {"properties": {
+        "File": {"type": "keyword"},
+        "Path": {"type": "text"},
+        "Shared": {"type": "integer"},
+        "Author": {"type": "keyword"},
+        "created": {"type": "double"},
+        "modified": {"type": "double"},
+    }},
+    "Share": {"properties": {
+        "File": {"type": "keyword"},
+        "Path": {"type": "text"},
+        "linkParam": {"type": "text"},
+        "read": {"type": "boolean"},
+        "edit": {"type": "boolean"},
+        "open_time": {"type": "double"},
+        "close_time": {"type": "double"}
+    }},
 }

@@ -18,7 +18,7 @@ class SessionHandler:
         if not self.__ES.indices.exists(index=Indexes[self.__Index]):
             self.__ES.indices.create(index=Indexes[self.__Index], mappings=Mapping[self.__Index])
 
-    def _CreateSession(self, username):
+    def CreateSession(self, username):
         try:
             token = uuid.uuid4().hex
             self.__ES.create(index=Indexes[self.__Index], id=token,
@@ -28,7 +28,7 @@ class SessionHandler:
                                  "time": time.time(),
                                  "valid": True
                              })
-            return {"status": True, "token": token}
+            return {"status": True, "session_id": token}
         except ConflictError:
             return {"status": False}
 
@@ -41,7 +41,7 @@ class SessionHandler:
             return {"status": False}
         return {"status": False}
 
-    def _CloseSession(self, session):
+    def CloseSession(self, session):
         try:
             self.__ES.update(index=Indexes[self.__Index], id=session,
                              body={
@@ -52,9 +52,8 @@ class SessionHandler:
             return {"status": False}
 
 
-class ElasticLoginHandler(SessionHandler):
+class ElasticLoginHandler():
     def __init__(self, username, password):
-        super().__init__(username, password)
         self.__Index = "Account"
         self.__username = username
         self.__password = password
@@ -63,7 +62,6 @@ class ElasticLoginHandler(SessionHandler):
         self._CreateIndex()
 
     def _CreateIndex(self):
-        super()._CreateIndex()
         if not self.__ES.indices.exists(index=Indexes[self.__Index]):
             self.__ES.indices.create(index=Indexes[self.__Index], mappings=Mapping[self.__Index])
 
@@ -85,13 +83,13 @@ class ElasticLoginHandler(SessionHandler):
         try:
             Out = self.__ES.get(index=Indexes[self.__Index], id=data.username)
             if Out["found"] and Out["_source"]["password"] == data.password:
-                return self.__SessionHandler._CreateSession(data.username)
+                return self.__SessionHandler.CreateSession(data.username)
         except NotFoundError:
             return {"status": False}
         return {"status": False}
 
     def LogoutUser(self, token):
-        return self.__SessionHandler._CloseSession(token)
+        return self.__SessionHandler.CloseSession(token)
 
     def UpdatePassword(self, data: AccountLogin):
         try:

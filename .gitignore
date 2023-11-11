@@ -5,3 +5,4 @@ databaseConfig.py
 .venv
 /Docker/data/
 /Docker/certs/
+/nikhil/
