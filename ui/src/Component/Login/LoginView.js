@@ -10,16 +10,16 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { AccountCircle } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../slice";
+import { authorize, login } from "../slice";
 import { useNavigate } from "react-router-dom";
-import { SetCookies } from "../../utils";
+import { readCookies } from "../../utils";
 
 const defaultTheme = createTheme();
 
 export const LoginView = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  var { username, session_id } = readCookies();
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -31,14 +31,16 @@ export const LoginView = () => {
       })
     );
   };
-  const { username, session_id, loaded, error } = useSelector(
-    (state) => state.user
-  );
+  const { authorized } = useSelector((state) => state.user);
 
   React.useEffect(() => {
-    if (username != null && session_id != null && loaded && !error) {
-      SetCookies(username, session_id);
-      navigate("/home");
+    if (username != null && session_id != null && authorized === true) {
+        navigate("/home");
+    }
+  });
+  React.useEffect(() => {
+    if (username != null && session_id != null) {
+        dispatch(authorize())
     }
   });
   return (

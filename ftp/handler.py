@@ -7,6 +7,7 @@ from starlette.responses import FileResponse, StreamingResponse
 import os
 import zipfile
 import io
+import shutil
 from databaseConfig import Indexes, Mapping
 
 FTP_BASE_PATH = "."
@@ -17,7 +18,7 @@ class FileHandle:
         self.__base_path = FTP_BASE_PATH
         self.__current_path = self.__base_path
         self.__username = username
-        self.CreateFolder(username)
+        self.__CreateUserSpace()
         self.__db_handler = DBHandle(username, es_username, es_password)
         self.__current_path = os.path.join(self.__base_path, self.__username)
 
@@ -35,21 +36,21 @@ class FileHandle:
 
     def CreateFile(self, name):
         current_time = time.time()
-        file = open(os.path.join(self.__current_path, name), 'w')
-        file.close()
         self.__db_handler.AddEntry({"File": name, "Path": os.path.join(self.__current_path, name),
                                     "Shared": 0, "Author": self.__username, "created": current_time,
                                     "modified": current_time})
 
+        file = open(os.path.join(self.__current_path, name), 'w')
+        file.close()
+
     def CreateFolder(self, name):
         try:
             current_time = time.time()
-            os.mkdir(os.path.join(self.__current_path, name))
             self.__db_handler.AddEntry(
                 {"File": name, "Path": os.path.join(self.__current_path, name),
                  "Shared": 0, "Author": self.__username, "created": current_time,
                  "modified": current_time})
-
+            os.mkdir(os.path.join(self.__current_path, name))
         except FileExistsError:
             return {"message": "Folder already exist"}
 
@@ -57,13 +58,13 @@ class FileHandle:
         try:
             filename = os.path.join(self.__current_path, file.filename)
             current_time = time.time()
-            with open(filename, 'wb') as f:
-                while contents := file.file.read(1024 * 1024):
-                    f.write(contents)
             self.__db_handler.AddEntry(
                 {"File": file.filename, "Path": filename,
                  "Shared": 0, "Author": self.__username, "created": current_time,
                  "modified": current_time})
+            with open(filename, 'wb') as f:
+                while contents := file.file.read(1024 * 1024):
+                    f.write(contents)
         except Exception as e:
             print(e)
             return {"message": "Error uploading the file"}
@@ -83,10 +84,10 @@ class FileHandle:
     def SendFolder(self, name):
         zip_bytes_io = io.BytesIO()
         with zipfile.ZipFile(zip_bytes_io, 'w', zipfile.ZIP_DEFLATED) as zipped:
-            for dirname, subdirs, files in os.walk(os.path.join(self.__current_path, name)):
-                zipped.write(dirname)
+            for root, dirs, files in os.walk(os.path.join(self.__current_path, name)):
+                zipped.write(root)
                 for filename in files:
-                    zipped.write(os.path.join(dirname, filename))
+                    zipped.write(os.path.join(root, filename))
 
         response = StreamingResponse(
             iter([zip_bytes_io.getvalue()]),
@@ -119,8 +120,11 @@ class FileHandle:
             return self.__ListFiller(dir_list)
 
     def SetCurrentDirectory(self, path):
-        path = path.split(os.path.sep)
-        path = ['.', self.__username] + path
+        if len(path) == 0:
+            path = ['.', self.__username]
+        else:
+            path = path.split(os.path.sep)
+            path = ['.', self.__username] + path
         path = os.path.sep.join(path)
         self.__current_path = path
 
@@ -132,19 +136,57 @@ class FileHandle:
         os.remove(os.path.join(self.__current_path, name))
         self.__db_handler.DeleteEntry(os.path.join(self.__current_path, name))
 
+    def DeleteFolder(self, name):
+        for root, dirs, files in os.walk(os.path.join(self.__current_path, name)):
+            for file in files:
+                self.__db_handler.DeleteEntry(os.path.join(root, file))
+        self.__db_handler.DeleteEntry(os.path.join(self.__current_path, name))
+        shutil.rmtree(os.path.join(self.__current_path, name))
+
     def RenameFile(self, prev_name, name):
-        os.rename(os.path.join(self.__current_path, prev_name),
-                  os.path.join(self.__current_path, name))
-        self.__db_handler.AddEntry(os.path.join(self.__current_path, name))
         details = self.__db_handler.GetDetails(os.path.join(self.__current_path,
                                                             prev_name))["_source"]
-        self.__db_handler.DeleteEntry(os.path.join(self.__current_path, prev_name))
         current_time = time.time()
         details["modified"] = current_time
         details["Path"] = os.path.join(self.__current_path, name)
         details["File"] = name
 
         self.__db_handler.AddEntry(details)
+        self.__db_handler.DeleteEntry(os.path.join(self.__current_path, prev_name))
+        os.rename(os.path.join(self.__current_path, prev_name),
+                  os.path.join(self.__current_path, name))
+
+    def RenameFolder(self, prev_name, name):
+        loc = len(self.__current_path.split(os.path.sep))
+        for root, dirs, files in os.walk(os.path.join(self.__current_path, prev_name)):
+            for file in files:
+                lis = root.split(os.path.sep)
+                lis[loc] = name
+                details = self.__db_handler.GetDetails(os.path.join(root, file))["_source"]
+                current_time = time.time()
+                details["modified"] = current_time
+                details["Path"] = os.path.join(os.path.sep.join(lis), file)
+                self.__db_handler.AddEntry(details)
+                self.__db_handler.DeleteEntry(os.path.join(root, file))
+
+            for i_dir in dirs:
+                lis = root.split(os.path.sep)
+                lis[loc] = name
+                details = self.__db_handler.GetDetails(os.path.join(root, i_dir))["_source"]
+                current_time = time.time()
+                details["modified"] = current_time
+                details["Path"] = os.path.join(os.path.sep.join(lis), i_dir)
+                self.__db_handler.AddEntry(details)
+                self.__db_handler.DeleteEntry(os.path.join(root, i_dir))
+        details = self.__db_handler.GetDetails(os.path.join(self.__current_path,
+                                                            prev_name))["_source"]
+        current_time = time.time()
+        details["modified"] = current_time
+        details["Path"] = os.path.join(self.__current_path, name)
+        details["File"] = name
+        self.__db_handler.AddEntry(details)
+        os.rename(os.path.join(self.__current_path, prev_name),
+                  os.path.join(self.__current_path, name))
 
 
 class DBHandle:

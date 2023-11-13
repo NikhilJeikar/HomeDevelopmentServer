@@ -12,7 +12,7 @@ export const readCookies = () => {
     const session_id = cookies.get('session_id')
   
     return {
-        username,
-        session_id
+      username,
+      session_id
     }
   }

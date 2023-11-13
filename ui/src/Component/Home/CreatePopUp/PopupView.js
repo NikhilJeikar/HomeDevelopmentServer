@@ -10,8 +10,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const PopupView = ({ title, open, handleClose }) => {
-    const [name,setName] = React.useState("");
+export const PopupView = ({ title, open, handleClose, buttonText,onSubmit }) => {
+  const [name, setName] = React.useState("");
   return (
     <React.Fragment>
       <Dialog
@@ -22,19 +22,25 @@ export const PopupView = ({ title, open, handleClose }) => {
       >
         <DialogContent>
           <TextField
-            autoFocus
             value={name}
             margin="none"
-            id="name"
+            // id="name"
             label={title}
-            onChange={(e) => { 
-                    setName(e.target.value); 
-                }} 
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
             fullWidth
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={()=>{handleClose(name)}} margin="none">Create</Button>
+          <Button
+            onClick={() => {
+              onSubmit(name);
+            }}
+            margin="none"
+          >
+            {buttonText}
+          </Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>

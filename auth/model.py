@@ -3,7 +3,7 @@ import time
 
 
 class AccountLogin(BaseModel):
-    username: str
+    username: str = None
     password: str
     time: float = time.time()
 
@@ -13,3 +13,9 @@ class AccountLogin(BaseModel):
             "password": self.password
         }
 
+
+class ChangePassword(BaseModel):
+    username: str = None
+    old_password: str
+    new_password: str
+    time: float = time.time()

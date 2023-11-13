@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Depends, Header, HTTPException
 from starlette.requests import Request
 
 from auth.handler import ElasticLoginHandler
@@ -13,6 +13,11 @@ import os
 app = FastAPI()
 
 LoginHandle = ElasticLoginHandler(Elastic_Username, Elastic_Password)
+
+
+async def Authorize(user: str = Header(), session: str = Header()):
+    if not LoginHandle.ValidateUser(user, session)["status"]:
+        raise HTTPException(401)
 
 
 @app.post("/user/create_user")
@@ -35,13 +40,19 @@ async def UpdatePassword(body: AccountLogin):
     return LoginHandle.UpdatePassword(body)
 
 
-@app.post("/user/is_user")
-async def UpdatePassword(body: AccountLogin):
-    return LoginHandle.IsUser(body.username)
+@app.post("/user/authorize", dependencies=[Depends(Authorize)])
+async def Authorized():
+    return {"status": True}
 
 
-@app.post("/home/file-list")
-async def FileList(body: FileList):
+@app.post("/user/logout", dependencies=[Depends(Authorize)])
+async def Logout(session: str = Header()):
+    return LoginHandle.LogoutUser(session)
+
+
+@app.post("/home/file-list", dependencies=[Depends(Authorize)])
+async def FileList(body: FileList, user: str = Header()):
+    body.username = user
     FileHandler = FileHandle(body.username, Elastic_Username, Elastic_Password)
     if type(body.current_path) == str:
         if len(body.current_path) != 0:
@@ -52,48 +63,79 @@ async def FileList(body: FileList):
     return FileHandler.List()
 
 
-@app.post("/home/create-file")
-async def CreateFile(body: Create):
+@app.post("/home/create-file", dependencies=[Depends(Authorize)])
+async def CreateFile(body: Create, user: str = Header()):
+    body.username = user
     FileHandler = FileHandle(body.username, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(body.current_path)
     return FileHandler.CreateFile(body.name)
 
 
-@app.post("/home/create-folder")
-async def CreateFolder(body: Create):
+@app.post("/home/create-folder", dependencies=[Depends(Authorize)])
+async def CreateFolder(body: Create, user: str = Header()):
+    body.username = user
     FileHandler = FileHandle(body.username, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(body.current_path)
     return FileHandler.CreateFolder(body.name)
 
 
-@app.post("/home/change-folder")
-async def ChangeDirectory(body: Create):
+@app.post("/home/change-folder", dependencies=[Depends(Authorize)])
+async def ChangeDirectory(body: Create, user: str = Header()):
+    body.username = user
     FileHandler = FileHandle(body.username, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(body.current_path)
     return FileHandler.ChangeDirectory(body.name)
 
 
-@app.post("/home/upload-file")
-async def UploadFiles(username: str, path: str, files: UploadFile = File(...)):
-    FileHandler = FileHandle(username, Elastic_Username, Elastic_Password)
+@app.post("/home/upload-file", dependencies=[Depends(Authorize)])
+async def UploadFiles(path: str, files: UploadFile = File(...), user: str = Header()):
+    FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(path)
     FileHandler.WriteFile(files)
     return {"name": files.filename}
 
 
-@app.get("/home/download-file")
-async def DownloadFile(username, current_path, name):
-    FileHandler = FileHandle(username, Elastic_Username, Elastic_Password)
+@app.get("/home/download-file", dependencies=[Depends(Authorize)])
+async def DownloadFile(current_path, name, user: str = Header()):
+    FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(current_path)
     return FileHandler.SendFile(name)
 
 
-@app.get("/home/download-folder")
-async def DownloadFolder(username, current_path, name):
-    FileHandler = FileHandle(username, Elastic_Username, Elastic_Password)
+@app.get("/home/download-folder", dependencies=[Depends(Authorize)])
+async def DownloadFolder(current_path, name, user: str = Header()):
+    FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(current_path)
     return FileHandler.SendFolder(name)
 
 
+@app.get("/home/delete-file", dependencies=[Depends(Authorize)])
+async def DeleteFile(current_path, name, user: str = Header()):
+    FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
+    FileHandler.SetCurrentDirectory(current_path)
+    return FileHandler.DeleteFile(name)
+
+
+@app.get("/home/delete-folder", dependencies=[Depends(Authorize)])
+async def DeleteFolder(current_path, name, user: str = Header()):
+    FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
+    FileHandler.SetCurrentDirectory(current_path)
+    return FileHandler.DeleteFolder(name)
+
+
+@app.get("/home/rename-file", dependencies=[Depends(Authorize)])
+async def RenameFile(current_path, prev_name, name, user: str = Header()):
+    FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
+    FileHandler.SetCurrentDirectory(current_path)
+    return FileHandler.RenameFile(prev_name, name)
+
+
+@app.get("/home/rename-folder", dependencies=[Depends(Authorize)])
+async def RenameFolder(current_path, prev_name, name, user: str = Header()):
+    FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
+    FileHandler.SetCurrentDirectory(current_path)
+    return FileHandler.RenameFolder(prev_name, name)
+
+
 if __name__ == '__main__':
-    uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True, workers=16)

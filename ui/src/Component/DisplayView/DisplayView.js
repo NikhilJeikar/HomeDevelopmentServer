@@ -5,12 +5,11 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import {
   CreateNewFolder,
   DriveFolderUpload,
@@ -18,34 +17,34 @@ import {
   NoteAdd,
   UploadFile,
 } from "@mui/icons-material";
-import { readCookies } from "../../utils";
 import { useDispatch, useSelector } from "react-redux";
-import { setToken } from "../slice";
+import { logout } from "../slice";
 import { Popup } from "../Home/CreatePopUp";
 import { create_file, create_folder, upload_file } from "../Home/slice";
 import { CollapsedBreadcrumbs } from "../Home/BreadCrumbs";
-import { LinearProgress } from "@mui/material";
+import { SetCookies } from "../../utils";
 
 const drawerWidth = 240;
 
 export const DisplayView = () => {
-  const { username, session_id } = readCookies();
   const dispatch = useDispatch();
-  React.useEffect(() => {
-    dispatch(setToken({ username, session_id }));
-  });
 
   const { current_path, path_list } = useSelector((state) => state.home);
 
   const [folderPopup, setFolderPopup] = React.useState(false);
   const [filePopup, setFilePopup] = React.useState(false);
 
+  const { authorized } = useSelector((state) => state.home);
+  React.useEffect(() => {
+    if (!authorized) {
+        navigate("/");
+    }
+  });
+  const navigate = useNavigate();
   const CreateFile = (name) => {
     if (name !== "") {
       dispatch(
         create_file({
-          username: username,
-          session_id: session_id,
           name: name,
           current_path: current_path,
         })
@@ -57,20 +56,26 @@ export const DisplayView = () => {
     if (name !== "") {
       dispatch(
         create_folder({
-          username: username,
-          session_id: session_id,
           current_path: current_path,
           name: name,
         })
       );
     }
-    setFolderPopup(false);
   };
 
+  const CloseFolder = () => {
+    setFolderPopup(false);
+  };
+  const CloseFile = () => {
+    setFilePopup(false);
+  };
   const UploadFileFunction = (files) => {
-    dispatch(
-      upload_file({ file: files, path: current_path, username: username })
-    );
+    dispatch(upload_file({ file: files, path: current_path }));
+  };
+  const LogoutUser = () => {
+    dispatch(logout());
+    SetCookies(null,null)
+    navigate("/");
   };
   return (
     <Box sx={{ display: "flex" }}>
@@ -173,14 +178,12 @@ export const DisplayView = () => {
           }}
         >
           <List>
-            <ListItem>
-              <Box sx={{ width: "100%" }}>
-              <Typography>Storage Sense</Typography>
-                <LinearProgress variant="determinate" value={10} />
-              </Box>
-            </ListItem>
             <ListItem key={"Logout"} disablePadding>
-              <ListItemButton variant="contained" component="label">
+              <ListItemButton
+                variant="contained"
+                component="label"
+                onClick={LogoutUser}
+              >
                 <ListItemIcon>
                   <Logout />
                 </ListItemIcon>
@@ -192,11 +195,19 @@ export const DisplayView = () => {
       </Drawer>
       <Box component="main" style={{ padding: 12 }} sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar variant="dense" />
-        <Popup open={filePopup} title={"Filename"} handleClose={CreateFile} />
+        <Popup
+          open={filePopup}
+          title={"Filename"}
+          handleClose={CloseFile}
+          onSubmit={CreateFile}
+          buttonText="Create"
+        />
         <Popup
           open={folderPopup}
           title={"Foldername"}
-          handleClose={CreateFolder}
+          handleClose={CloseFolder}
+          onSubmit={CreateFolder}
+          buttonText="Create"
         />
         <CollapsedBreadcrumbs Path={path_list} />
         <Outlet />

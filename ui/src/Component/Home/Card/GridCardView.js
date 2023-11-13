@@ -7,11 +7,17 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Description, Folder } from "@mui/icons-material";
 import { GridMenu } from "./GridMenu";
 import { useDispatch, useSelector } from "react-redux";
-import { download_file, download_folder } from "../slice";
+import {
+  delete_file,
+  delete_folder,
+  download_file,
+  download_folder,
+  rename_file,
+  rename_folder,
+} from "../slice";
 
 export const GridCardView = ({ details, handle }) => {
   var data = new Date(details.metadata.created * 1000);
-  const { username } = useSelector((state) => state.user);
   const { current_path } = useSelector((state) => state.home);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -22,20 +28,56 @@ export const GridCardView = ({ details, handle }) => {
   };
   const download = () => {
     handleClose();
-    if(details.is_dir){
+    if (details.is_dir) {
       dispatch(
         download_folder({
-          username: username,
           name: details.name,
-          current_path: current_path
+          current_path: current_path,
         })
       );
-    }else{
+    } else {
       dispatch(
         download_file({
-          username: username,
           name: details.name,
-          current_path: current_path
+          current_path: current_path,
+        })
+      );
+    }
+  };
+  const delete_request = () => {
+    handleClose();
+    if (details.is_dir) {
+      dispatch(
+        delete_folder({
+          name: details.name,
+          current_path: current_path,
+        })
+      );
+    } else {
+      dispatch(
+        delete_file({
+          name: details.name,
+          current_path: current_path,
+        })
+      );
+    }
+  };
+  const rename = (name) => {
+    handleClose();
+    if (details.is_dir) {
+      dispatch(
+        rename_folder({
+          prev_name: details.name,
+          name: name,
+          current_path: current_path,
+        })
+      );
+    } else {
+      dispatch(
+        rename_file({
+          prev_name: details.name,
+          name: name,
+          current_path: current_path,
         })
       );
     }
@@ -75,6 +117,8 @@ export const GridCardView = ({ details, handle }) => {
         open={open}
         handleClose={handleClose}
         download={download}
+        delete_request={delete_request}
+        rename={rename}
       />
     </Card>
   );

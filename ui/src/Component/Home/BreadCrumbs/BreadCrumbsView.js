@@ -6,14 +6,11 @@ import { Link } from "@mui/material";
 
 export const CollapsedBreadcrumbsView = () => {
   const dispatch = useDispatch();
-  const { username, session_id } = useSelector((state) => state.user);
   const { path_list } = useSelector((state) => state.home);
   const handleClick = (event) => {
     event.preventDefault();
     dispatch(
         file_list({
-        username: username,
-        session_id: session_id,
         current_path: path_list.slice(0,event.target.getAttribute("index")),
       })
     );

@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { SetCookies, readCookies } from "../utils";
 
 const initialState = {
-  username: null,
-  session_id: null,
   loading: false,
   loaded: false,
   error: false,
+  authorized: null,
 };
 
 export const login = createAsyncThunk(
@@ -38,16 +38,13 @@ export const login = createAsyncThunk(
 export const authorize = createAsyncThunk(
   "user/authorize",
   async (params, thunkAPI) => {
+    var { username, session_id } = readCookies();
     var response = await fetch("/user/authorize", {
       method: "POST",
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        user: username,
+        session: session_id,
       },
-      body: JSON.stringify({
-        username: params.username,
-        session_id: params.session_id,
-      }),
     });
     var json = await response.json();
     var status = await response.status;
@@ -55,10 +52,31 @@ export const authorize = createAsyncThunk(
       return { failed: true };
     }
     if (json.status) {
-      return { failed: false, session_id: params.session_id };
+      return { failed: false};
     } else {
-      return { session_id: null };
+      return { failed: true, session_id: null };
     }
+  }
+);
+
+export const logout = createAsyncThunk(
+  "user/logout",
+  async (params, thunkAPI) => {
+    var { username, session_id } = readCookies();
+    var response = await fetch("/user/logout", {
+      method: "POST",
+      headers: {
+        user: username,
+        session: session_id,
+      },
+    });
+    var status = await response.status;
+    if (status !== 200) {
+      return { failed: true };
+    }
+    return {
+      failed: false,
+    };
   }
 );
 
@@ -66,38 +84,31 @@ export const user = createSlice({
   name: "user",
   initialState: initialState,
   reducers: {
-    setToken: (state, action) => {
-      const { username, session_id } = action.payload;
-      state.username = username;
-      state.session_id = session_id;
-    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(login.fulfilled, (state, action) => {
-        state.session_id = action.payload.session_id;
-        state.username = action.payload.username;
-        state.loading = false;
-        state.loaded = true;
-        state.error = action.payload.failed;
+        SetCookies(action.payload.username, action.payload.session_id);
+        state.authorized = !action.payload.failed;
       })
-      .addCase(login.pending, (state, action) => {
-        state.loading = true;
-        state.loaded = false;
-        state.error = false;
-      })
+      .addCase(login.pending, (state, action) => {})
       .addCase(login.rejected, (state, action) => {
-        state.loading = false;
-        state.loaded = true;
         state.error = true;
+        state.authorized = false;
       })
       .addCase(authorize.fulfilled, (state, action) => {
-        state.session_id = action.payload.session_id;
-        state.error = action.payload.failed;
+        state.authorized = !action.payload.failed;
       })
       .addCase(authorize.pending, (state, action) => {})
-      .addCase(authorize.rejected, (state, action) => {});
+      .addCase(authorize.rejected, (state, action) => {
+        state.authorized = false;
+      })
+      .addCase(logout.fulfilled, (state, action) => {
+        state.authorized = false;
+      })
+      .addCase(logout.pending, (state, action) => {})
+      .addCase(logout.rejected, (state, action) => {});
   },
 });
 export const { setToken } = user.actions;
-export default user.reducer
+export default user.reducer;

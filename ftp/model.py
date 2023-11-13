@@ -7,15 +7,13 @@ import time
 
 
 class FileList(BaseModel):
-    username: str
-    session_id: str
+    username: str = None
     current_path: Union[str, list[str]]
     time: float = time.time()
 
 
 class Create(BaseModel):
-    username: str
-    session_id: str
+    username: str = None
     name: str
     current_path: str
     dir: bool
@@ -23,14 +21,13 @@ class Create(BaseModel):
 
 
 class CurrentPath(BaseModel):
-    username: str
-    session_id: str
+    username: str = None
     name: str
     time: float = time.time()
 
 
 class Download(BaseModel):
-    username: str
+    username: str = None
     current_path: str
     name: str
-    dir:bool
+    dir: bool

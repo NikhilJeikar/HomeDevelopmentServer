@@ -32,10 +32,10 @@ class SessionHandler:
         except ConflictError:
             return {"status": False}
 
-    def ValidateSession(self, session, username):
+    def ValidateSession(self, username, session):
         try:
             Out = self.__ES.get(index=Indexes[self.__Index], id=session)
-            if Out["found"] and Out["_source"]["username"] == username:
+            if Out["found"] and Out["_source"]["username"] == username and Out["_source"]["valid"]:
                 return {"status": True}
         except NotFoundError:
             return {"status": False}
@@ -44,15 +44,16 @@ class SessionHandler:
     def CloseSession(self, session):
         try:
             self.__ES.update(index=Indexes[self.__Index], id=session,
-                             body={
+                             body={'doc': {
                                  "valid": False
+                             }
                              })
             return {"status": True}
         except ConflictError:
             return {"status": False}
 
 
-class ElasticLoginHandler():
+class ElasticLoginHandler:
     def __init__(self, username, password):
         self.__Index = "Account"
         self.__username = username
@@ -78,6 +79,9 @@ class ElasticLoginHandler():
                                 sort=["username:ASC"],
                                 from_=start, size=20)
         return [i["_source"]["username"] for i in page["hits"]["hits"]]
+
+    def ValidateUser(self, username, session):
+        return self.__SessionHandler.ValidateSession(username, session)
 
     def LoginUser(self, data: AccountLogin):
         try:
