@@ -13,6 +13,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { authorize, login } from "../slice";
 import { useNavigate } from "react-router-dom";
 import { readCookies } from "../../utils";
+import { clearState } from "../Drive/slice";
+
 
 const defaultTheme = createTheme();
 
@@ -35,12 +37,13 @@ export const LoginView = () => {
 
   React.useEffect(() => {
     if (username != null && session_id != null && authorized === true) {
-        navigate("/home");
+      dispatch(clearState());
+      navigate("/drive");
     }
   });
   React.useEffect(() => {
     if (username != null && session_id != null) {
-        dispatch(authorize())
+      dispatch(authorize());
     }
   });
   return (

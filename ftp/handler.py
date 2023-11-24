@@ -1,14 +1,16 @@
 import time
 
 from elasticsearch import Elasticsearch, ConflictError
-from fastapi import UploadFile, File
+from fastapi import UploadFile, File, HTTPException
 from starlette.responses import FileResponse, StreamingResponse
 
 import os
 import zipfile
 import io
 import shutil
+import uuid
 from databaseConfig import Indexes, Mapping
+from ftp.model import CreateShared
 
 FTP_BASE_PATH = "."
 
@@ -30,37 +32,41 @@ class FileHandle:
 
     def __CreateUserSpace(self):
         try:
-            os.mkdir(os.path.join(self.__current_path, self.__username))
+            os.makedirs(os.path.join(self.__current_path, self.__username))
         except FileExistsError:
             return {"message": "User space exist already exist"}
 
-    def CreateFile(self, name):
+    def CreateFile(self, name, username=None):
         current_time = time.time()
         self.__db_handler.AddEntry({"File": name, "Path": os.path.join(self.__current_path, name),
-                                    "Shared": 0, "Author": self.__username, "created": current_time,
+                                    "Shared": 0,
+                                    "Author": self.__username if username is None else username,
+                                    "created": current_time,
                                     "modified": current_time})
 
         file = open(os.path.join(self.__current_path, name), 'w')
         file.close()
 
-    def CreateFolder(self, name):
+    def CreateFolder(self, name, username=None):
         try:
             current_time = time.time()
             self.__db_handler.AddEntry(
                 {"File": name, "Path": os.path.join(self.__current_path, name),
-                 "Shared": 0, "Author": self.__username, "created": current_time,
+                 "Shared": 0, "Author": self.__username if username is None else username,
+                 "created": current_time,
                  "modified": current_time})
             os.mkdir(os.path.join(self.__current_path, name))
         except FileExistsError:
             return {"message": "Folder already exist"}
 
-    def WriteFile(self, file: UploadFile = File(...)):
+    def WriteFile(self, file: UploadFile = File(...), username=None):
         try:
             filename = os.path.join(self.__current_path, file.filename)
             current_time = time.time()
             self.__db_handler.AddEntry(
                 {"File": file.filename, "Path": filename,
-                 "Shared": 0, "Author": self.__username, "created": current_time,
+                 "Shared": 0, "Author": self.__username if username is None else username,
+                 "created": current_time,
                  "modified": current_time})
             with open(filename, 'wb') as f:
                 while contents := file.file.read(1024 * 1024):
@@ -107,6 +113,7 @@ class FileHandle:
                 "dir_list": self.__current_path.split(os.path.sep)[2:]}
 
     def List(self, name=None):
+        print(self.__current_path)
         if name is None:
             dir_list = []
             for i in os.listdir(self.__current_path):
@@ -114,9 +121,10 @@ class FileHandle:
             return self.__ListFiller(dir_list)
         else:
             dir_list = []
-            for i in os.listdir(os.path.join(self.__current_path, name)):
+            self.__current_path = os.path.join(self.__current_path, name)
+            for i in os.listdir(self.__current_path):
                 dir_list.append(
-                    (i, os.path.isdir(os.path.join(os.path.join(self.__current_path, name), i))))
+                    (i, os.path.isdir(os.path.join(self.__current_path, i))))
             return self.__ListFiller(dir_list)
 
     def SetCurrentDirectory(self, path):
@@ -130,7 +138,12 @@ class FileHandle:
 
     def ChangeDirectory(self, name):
         self.__current_path = os.path.join(self.__current_path, name)
-        return self.List()
+        print(f"Current Path {self.__current_path}")
+        if os.path.exists(self.__current_path):
+            return {"dir": os.path.sep.join(self.__current_path.split(os.path.sep)[2:]),
+                    "dir_list": self.__current_path.split(os.path.sep)[2:]}
+        else:
+            raise HTTPException(status_code=404, detail="Invalid path")
 
     def DeleteFile(self, name):
         os.remove(os.path.join(self.__current_path, name))
@@ -157,7 +170,7 @@ class FileHandle:
                   os.path.join(self.__current_path, name))
 
     def RenameFolder(self, prev_name, name):
-        loc = len(self.__current_path.split(os.path.sep))
+        loc = len([i for i in self.__current_path.split(os.path.sep) if len(i) != 0])
         for root, dirs, files in os.walk(os.path.join(self.__current_path, prev_name)):
             for file in files:
                 lis = root.split(os.path.sep)
@@ -226,12 +239,119 @@ class DBHandle:
 
 class ShareHandle:
     def __init__(self, es_username, es_password):
-        self.__Index = "Files"
+        self.__Index = "Shared"
         self.__es_username = es_username
         self.__es_password = es_password
         self.__ES = Elasticsearch(http_auth=(self.__es_username, self.__es_password))
         self._CreateIndex()
+        self.__User = None
+        self.__FileHandle = None
+        self.__Editable = False
+        self.__Readable = False
+        self.__BasePath = None
 
     def _CreateIndex(self):
         if not self.__ES.indices.exists(index=Indexes[self.__Index]):
             self.__ES.indices.create(index=Indexes[self.__Index], mappings=Mapping[self.__Index])
+
+    def GetSharableToken(self, data: CreateShared):
+        if data.linkParam is None:
+            token = uuid.uuid4().hex
+            data.linkParam = token
+            self.__ES.create(index=Indexes[self.__Index], id=token,
+                             document=data.dict())
+            return {"status": True, "shared": token}
+        else:
+            if not self.__ES.exists(id=data.linkParam, index=Indexes[self.__Index]):
+                return {"status": False, "Error": "Invalid token"}
+            else:
+                self.__ES.update(index=Indexes[self.__Index], id=data.linkParam,
+                                 body={'doc': data.dict()})
+                return {"status": True, "shared": data.linkParam}
+
+    def RevokeToken(self, token: str):
+        if not self.__ES.exists(id=token, index=Indexes[self.__Index]):
+            return {"status": False, "Error": "Invalid token"}
+        else:
+            self.__ES.update(index=Indexes[self.__Index], id=token,
+                             body={'doc': {
+                                 "valid": False
+                             }})
+
+    def ValidateToken(self, token: str):
+        if self.__ES.exists(id=token, index=Indexes[self.__Index]):
+            details = self.__ES.get(id=token, index=Indexes[self.__Index])["_source"]
+            if details.get("valid"):
+                CurrentTime = time.time()
+                LTime = -1 if details.get("open_time") is None else details.get("open_time")
+                RTime = float("inf") if details.get("close_time") is None else details.get(
+                    "close_time")
+                if LTime <= CurrentTime <= RTime:
+                    return {"status": True, "response": details}
+                else:
+                    if LTime > CurrentTime:
+                        return {"status": False, "Error": "Link is not opened yet"}
+            else:
+                return {"status": False, "Error": "Invalid link"}
+        else:
+            return {"status": False, "Error": "Invalid link"}
+
+    def AccessSharedToken(self, token: str):
+        Response = self.ValidateToken(token)
+        TokenResponse = Response.get("response")
+
+        self.__Editable = TokenResponse.get("edit")
+        self.__Readable = TokenResponse.get("read")
+        if not Response.get("status"):
+            return Response
+        self.__FileHandle = FileHandle(TokenResponse.get("username"), self.__es_username,
+                                       self.__es_password)
+        self.__BasePath = TokenResponse.get("path")
+        self.__FileHandle.SetCurrentDirectory(TokenResponse.get("path"))
+
+    def CreateFile(self, name, username):
+        if self.__Editable:
+            return self.__FileHandle.CreateFile(name, username)
+
+    def CreateFolder(self, name, username):
+        if self.__Editable:
+            return self.__FileHandle.CreateFolder(name, username)
+
+    def WriteFile(self, username, file: UploadFile = File(...)):
+        if self.__Editable:
+            return self.__FileHandle.WriteFile(file, username)
+
+    def SendFile(self, name):
+        if self.__Editable:
+            return self.__FileHandle.SendFile(name)
+
+    def SendFolder(self, name):
+        if self.__Editable:
+            return self.__FileHandle.SendFolder(name)
+
+    def ChangeDirectory(self, dir_list):
+        return self.__FileHandle.ChangeDirectory(dir_list)
+
+    def SetCurrentDirectory(self, path):
+        if len(path) != 0:
+            return self.__FileHandle.SetCurrentDirectory(path)
+
+    def List(self, name: str = None):
+        if self.__Readable or self.__Editable:
+            return self.__FileHandle.List(name)
+
+    def DeleteFile(self, name):
+        if self.__Editable:
+            return self.__FileHandle.DeleteFile(name)
+
+    def DeleteFolder(self, name):
+        if self.__Editable:
+            return self.__FileHandle.DeleteFolder(name)
+
+    def RenameFile(self, prev_name, name):
+        if self.__Editable:
+            return self.__FileHandle.RenameFile(prev_name, name)
+
+    def RenameFolder(self, prev_name, name):
+        if self.__Editable:
+            return self.__FileHandle.RenameFolder(prev_name, name)

@@ -1,7 +1,8 @@
 Indexes = {
     "Account": "account",
     "Session": "session",
-    "Files": "files"
+    "Files": "files",
+    "Shared": "shared"
 }
 
 Mapping = {
@@ -29,13 +30,14 @@ Mapping = {
         "created": {"type": "double"},
         "modified": {"type": "double"},
     }},
-    "Share": {"properties": {
-        "File": {"type": "keyword"},
-        "Path": {"type": "text"},
+    "Shared": {"properties": {
+        "path": {"type": "text"},
         "linkParam": {"type": "text"},
+        "username": {"type": "keyword"},
         "read": {"type": "boolean"},
         "edit": {"type": "boolean"},
         "open_time": {"type": "double"},
-        "close_time": {"type": "double"}
+        "close_time": {"type": "double"},
+        "valid": {"type": "boolean"},
     }},
 }

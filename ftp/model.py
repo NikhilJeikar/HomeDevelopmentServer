@@ -14,9 +14,9 @@ class FileList(BaseModel):
 
 class Create(BaseModel):
     username: str = None
-    name: str
+    name: str = None
     current_path: str
-    dir: bool
+    dir: bool = False
     time: float = time.time()
 
 
@@ -31,3 +31,14 @@ class Download(BaseModel):
     current_path: str
     name: str
     dir: bool
+
+
+class CreateShared(BaseModel):
+    path: str
+    linkParam: str = None
+    username: str = None
+    read: bool
+    edit: bool
+    valid: bool = True
+    open_time: float = None
+    close_time: float = None
