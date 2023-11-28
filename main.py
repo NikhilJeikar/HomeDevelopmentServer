@@ -10,9 +10,12 @@ from ftp.handler import FileHandle, ShareHandle
 from ftp.model import FileList, Create, CreateShared
 import os
 
+from photos.watcher import GlobalWatcher
+
 app = FastAPI()
 
 LoginHandle = ElasticLoginHandler(Elastic_Username, Elastic_Password)
+Watcher = GlobalWatcher()
 
 
 async def Authorize(user: str = Header(), session: str = Header()):

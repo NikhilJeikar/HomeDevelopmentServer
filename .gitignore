@@ -3,6 +3,6 @@ databaseConfig.py
 
 .idea
 .venv
-/Docker/data/
-/Docker/certs/
+/docker/data/
+/docker/certs/
 /nikhil/
