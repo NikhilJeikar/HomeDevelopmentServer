@@ -28,37 +28,37 @@ async def AuthorizeShare(user: str = Header(), session: str = Header(), share_id
         raise HTTPException(401)
 
 
-@app.post("/user/create_user")
+@app.post("/api/user/create_user")
 async def CreateUser(body: AccountLogin):
     return LoginHandle.CreateUser(body)
 
 
-@app.get("/user/users")
+@app.get("/api/user/users")
 async def FetchUsers(request: Request):
     return LoginHandle.FetchUsers(request.query_params.get("start", 0))
 
 
-@app.post("/user/login_user")
+@app.post("/api/user/login_user")
 async def LoginUser(body: AccountLogin):
     return LoginHandle.LoginUser(body)
 
 
-@app.post("/user/update_password")
+@app.post("/api/user/update_password")
 async def UpdatePassword(body: AccountLogin):
     return LoginHandle.UpdatePassword(body)
 
 
-@app.post("/user/authorize", dependencies=[Depends(Authorize)])
+@app.post("/api/user/authorize", dependencies=[Depends(Authorize)])
 async def Authorized():
     return {"status": True}
 
 
-@app.post("/user/logout", dependencies=[Depends(Authorize)])
+@app.post("/api/user/logout", dependencies=[Depends(Authorize)])
 async def Logout(session: str = Header()):
     return LoginHandle.LogoutUser(session)
 
 
-@app.post("/home/file-list", dependencies=[Depends(Authorize)])
+@app.post("/api/drive/file-list", dependencies=[Depends(Authorize)])
 async def ListFile(body: FileList, user: str = Header()):
     body.username = user
     FileHandler = FileHandle(body.username, Elastic_Username, Elastic_Password)
@@ -71,7 +71,7 @@ async def ListFile(body: FileList, user: str = Header()):
     return FileHandler.List()
 
 
-@app.post("/home/create-file", dependencies=[Depends(Authorize)])
+@app.post("/api/drive/create-file", dependencies=[Depends(Authorize)])
 async def CreateFile(body: Create, user: str = Header()):
     body.username = user
     FileHandler = FileHandle(body.username, Elastic_Username, Elastic_Password)
@@ -79,7 +79,7 @@ async def CreateFile(body: Create, user: str = Header()):
     return FileHandler.CreateFile(body.name)
 
 
-@app.post("/home/create-folder", dependencies=[Depends(Authorize)])
+@app.post("/api/drive/create-folder", dependencies=[Depends(Authorize)])
 async def CreateFolder(body: Create, user: str = Header()):
     body.username = user
     FileHandler = FileHandle(body.username, Elastic_Username, Elastic_Password)
@@ -87,7 +87,7 @@ async def CreateFolder(body: Create, user: str = Header()):
     return FileHandler.CreateFolder(body.name)
 
 
-@app.post("/home/change-folder", dependencies=[Depends(Authorize)])
+@app.post("/api/drive/change-folder", dependencies=[Depends(Authorize)])
 async def ChangeDirectory(body: Create, user: str = Header()):
     body.username = user
     FileHandler = FileHandle(body.username, Elastic_Username, Elastic_Password)
@@ -95,7 +95,7 @@ async def ChangeDirectory(body: Create, user: str = Header()):
     return FileHandler.ChangeDirectory(body.name)
 
 
-@app.post("/home/upload-file", dependencies=[Depends(Authorize)])
+@app.post("/api/drive/upload-file", dependencies=[Depends(Authorize)])
 async def UploadFiles(path: str, files: UploadFile = File(...), user: str = Header()):
     FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(path)
@@ -103,56 +103,56 @@ async def UploadFiles(path: str, files: UploadFile = File(...), user: str = Head
     return {"name": files.filename}
 
 
-@app.get("/home/download-file", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/download-file", dependencies=[Depends(Authorize)])
 async def DownloadFile(current_path, name, user: str = Header()):
     FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(current_path)
     return FileHandler.SendFile(name)
 
 
-@app.get("/home/download-folder", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/download-folder", dependencies=[Depends(Authorize)])
 async def DownloadFolder(current_path, name, user: str = Header()):
     FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(current_path)
     return FileHandler.SendFolder(name)
 
 
-@app.get("/home/delete-file", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/delete-file", dependencies=[Depends(Authorize)])
 async def DeleteFile(current_path, name, user: str = Header()):
     FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(current_path)
     return FileHandler.DeleteFile(name)
 
 
-@app.get("/home/delete-folder", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/delete-folder", dependencies=[Depends(Authorize)])
 async def DeleteFolder(current_path, name, user: str = Header()):
     FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(current_path)
     return FileHandler.DeleteFolder(name)
 
 
-@app.get("/home/rename-file", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/rename-file", dependencies=[Depends(Authorize)])
 async def RenameFile(current_path, prev_name, name, user: str = Header()):
     FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(current_path)
     return FileHandler.RenameFile(prev_name, name)
 
 
-@app.get("/home/rename-folder", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/rename-folder", dependencies=[Depends(Authorize)])
 async def RenameFolder(current_path, prev_name, name, user: str = Header()):
     FileHandler = FileHandle(user, Elastic_Username, Elastic_Password)
     FileHandler.SetCurrentDirectory(current_path)
     return FileHandler.RenameFolder(prev_name, name)
 
 
-@app.post("/home/share", dependencies=[Depends(Authorize)])
+@app.post("/api/drive/share", dependencies=[Depends(Authorize)])
 async def GetSharedLink(data: CreateShared, user: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     data.username = user
     return ShareHandler.GetSharableToken(data)
 
 
-@app.post("/share/change-folder", dependencies=[Depends(Authorize)])
+@app.post("/api/drive/share/change-folder", dependencies=[Depends(Authorize)])
 async def ChangedDirectoryShare(body: Create, share: str = Header(), user: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
@@ -160,7 +160,7 @@ async def ChangedDirectoryShare(body: Create, share: str = Header(), user: str =
     return ShareHandler.ChangeDirectory(body.name)
 
 
-@app.post("/share/file-list")
+@app.post("/api/drive/share/file-list")
 async def FileListShare(body: FileList, share: str = Header(), user: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
@@ -171,23 +171,23 @@ async def FileListShare(body: FileList, share: str = Header(), user: str = Heade
     return ShareHandler.List()
 
 
-@app.post("/share/create-file", dependencies=[Depends(Authorize)])
+@app.post("/api/drive/share/create-file", dependencies=[Depends(Authorize)])
 async def CreateFileShare(body: Create, share: str = Header(), user: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
     ShareHandler.ChangeDirectory(body.current_path)
-    return ShareHandler.CreateFile(body.name, user)
+    return ShareHandler.CreateFile(body.name, user.lower())
 
 
-@app.post("/share/create-folder", dependencies=[Depends(Authorize)])
+@app.post("/api/drive/share/create-folder", dependencies=[Depends(Authorize)])
 async def CreateFolderShare(body: Create, share: str = Header(), user: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
     ShareHandler.ChangeDirectory(body.current_path)
-    return ShareHandler.CreateFolder(body.name, user)
+    return ShareHandler.CreateFolder(body.name, user.lower())
 
 
-@app.post("/share/upload-file", dependencies=[Depends(Authorize)])
+@app.post("/api/drive/share/upload-file", dependencies=[Depends(Authorize)])
 async def UploadFilesShare(path: str, files: UploadFile = File(...), share: str = Header(),
                            user: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
@@ -197,7 +197,7 @@ async def UploadFilesShare(path: str, files: UploadFile = File(...), share: str 
     return {"name": files.filename}
 
 
-@app.get("/share/download-file", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/share/download-file", dependencies=[Depends(Authorize)])
 async def DownloadFileShare(current_path, name, user: str = Header(), share: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
@@ -205,7 +205,7 @@ async def DownloadFileShare(current_path, name, user: str = Header(), share: str
     return ShareHandler.SendFile(name)
 
 
-@app.get("/share/download-folder", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/share/download-folder", dependencies=[Depends(Authorize)])
 async def DownloadFolderShare(current_path, name, user: str = Header(), share: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
@@ -213,7 +213,7 @@ async def DownloadFolderShare(current_path, name, user: str = Header(), share: s
     return ShareHandler.SendFolder(name)
 
 
-@app.get("/share/delete-file", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/share/delete-file", dependencies=[Depends(Authorize)])
 async def DeleteFile(current_path, name, user: str = Header(), share: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
@@ -221,7 +221,7 @@ async def DeleteFile(current_path, name, user: str = Header(), share: str = Head
     return ShareHandler.DeleteFile(name)
 
 
-@app.get("/share/delete-folder", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/share/delete-folder", dependencies=[Depends(Authorize)])
 async def DeleteFolder(current_path, name, user: str = Header(), share: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
@@ -229,7 +229,7 @@ async def DeleteFolder(current_path, name, user: str = Header(), share: str = He
     return ShareHandler.DeleteFolder(name)
 
 
-@app.get("/share/rename-file", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/share/rename-file", dependencies=[Depends(Authorize)])
 async def RenameFile(current_path, prev_name, name, user: str = Header(), share: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
@@ -237,7 +237,7 @@ async def RenameFile(current_path, prev_name, name, user: str = Header(), share:
     return ShareHandler.RenameFile(prev_name, name)
 
 
-@app.get("/share/rename-folder", dependencies=[Depends(Authorize)])
+@app.get("/api/drive/share/rename-folder", dependencies=[Depends(Authorize)])
 async def RenameFolder(current_path, prev_name, name, user: str = Header(), share: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)

@@ -30,12 +30,12 @@ const drawerWidth = 240;
 export const DisplayView = () => {
   const dispatch = useDispatch();
 
-  const { current_path, path_list } = useSelector((state) => state.home);
+  const { current_path, path_list } = useSelector((state) => state.drive);
 
   const [folderPopup, setFolderPopup] = React.useState(false);
   const [filePopup, setFilePopup] = React.useState(false);
 
-  const { authorized } = useSelector((state) => state.home);
+  const { authorized } = useSelector((state) => state.drive);
   React.useEffect(() => {
     if (!authorized) {
         navigate("/");

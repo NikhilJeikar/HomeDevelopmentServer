@@ -1,6 +1,7 @@
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConflictError, NotFoundError
 
+from config import Elastic_URL
 from databaseConfig import Mapping, Indexes
 from auth.model import AccountLogin
 
@@ -11,7 +12,7 @@ import time
 class SessionHandler:
     def __init__(self, username, password):
         self.__Index = "Session"
-        self.__ES = Elasticsearch(http_auth=(username, password))
+        self.__ES = Elasticsearch(hosts=Elastic_URL, http_auth=(username, password))
         self._CreateIndex()
 
     def _CreateIndex(self):
@@ -58,7 +59,7 @@ class ElasticLoginHandler:
         self.__Index = "Account"
         self.__username = username
         self.__password = password
-        self.__ES = Elasticsearch(http_auth=(self.__username, self.__password))
+        self.__ES = Elasticsearch(hosts=Elastic_URL, http_auth=(self.__username, self.__password))
         self.__SessionHandler = SessionHandler(self.__username, self.__password)
         self._CreateIndex()
 

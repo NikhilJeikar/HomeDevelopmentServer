@@ -11,13 +11,13 @@ const initialState = {
 };
 
 export const file_list = createAsyncThunk(
-  "home/file-list",
+  "drive/file-list",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     var response = await fetch(
-      shareToken === null ? "/home/file-list" : "/share/file-list",
+      shareToken === null ? "/api/drive/file-list" : "/api/drive/share/file-list",
       {
         method: "POST",
         headers:
@@ -55,13 +55,13 @@ export const file_list = createAsyncThunk(
 );
 
 export const create_file = createAsyncThunk(
-  "home/create-file",
+  "drive/create-file",
   async (params, thunkAPI) => {
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     var { username, session_id } = readCookies();
     var response = await fetch(
-      shareToken === null ? "/home/create-file" : "/share/create-file",
+      shareToken === null ? "/api/drive/create-file" : "/api/drive/share/create-file",
       {
         method: "POST",
         headers:
@@ -96,13 +96,13 @@ export const create_file = createAsyncThunk(
 );
 
 export const create_folder = createAsyncThunk(
-  "home/create-folder",
+  "drive/create-folder",
   async (params, thunkAPI) => {
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     var { username, session_id } = readCookies();
     var response = await fetch(
-      shareToken === null ? "/home/create-folder" : "/share/create-folder",
+      shareToken === null ? "/api/drive/create-folder" : "/api/drive/share/create-folder",
       {
         method: "POST",
         headers:
@@ -137,13 +137,13 @@ export const create_folder = createAsyncThunk(
 );
 
 export const change_folder = createAsyncThunk(
-  "home/change-folder",
+  "drive/change-folder",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     var response = await fetch(
-      shareToken === null ? "/home/change-folder" : "/share/change-folder",
+      shareToken === null ? "/api/drive/change-folder" : "/api/drive/share/change-folder",
       {
         method: "POST",
         headers:
@@ -181,7 +181,7 @@ export const change_folder = createAsyncThunk(
 );
 
 export const upload_file = createAsyncThunk(
-  "home/upload-file",
+  "drive/upload-file",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
     const queryParameters = new URLSearchParams(window.location.search);
@@ -191,8 +191,8 @@ export const upload_file = createAsyncThunk(
       data.append("files", file, file.name);
       var response = await fetch(
         shareToken === null
-          ? `/home/upload-file?path=${path.toString()}`
-          : `/share/upload-file?path=${path.toString()}`,
+          ? `/api/drive/upload-file?path=${path.toString()}`
+          : `/api/drive/share/upload-file?path=${path.toString()}`,
         {
           method: "POST",
           headers:
@@ -228,15 +228,15 @@ export const upload_file = createAsyncThunk(
 );
 
 export const download_file = createAsyncThunk(
-  "/home/download-file",
+  "drive/download-file",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     fetch(
       shareToken === null
-        ? `/home/download-file?current_path=${params.current_path}&name=${params.name}`
-        : `/share/download-file?current_path=${params.current_path}&name=${params.name}`,
+        ? `/api/drive/download-file?current_path=${params.current_path}&name=${params.name}`
+        : `/api/drive/share/download-file?current_path=${params.current_path}&name=${params.name}`,
       {
         headers:
           shareToken === null
@@ -266,15 +266,15 @@ export const download_file = createAsyncThunk(
 );
 
 export const download_folder = createAsyncThunk(
-  "/home/download-folder",
+  "drive/download-folder",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     fetch(
       shareToken === null
-        ? `/home/download-folder?current_path=${params.current_path}&name=${params.name}`
-        : `/share/download-folder?current_path=${params.current_path}&name=${params.name}`,
+        ? `/api/drive/download-folder?current_path=${params.current_path}&name=${params.name}`
+        : `/api/drive/share/download-folder?current_path=${params.current_path}&name=${params.name}`,
       {
         headers:
           shareToken === null
@@ -304,15 +304,15 @@ export const download_folder = createAsyncThunk(
 );
 
 export const delete_file = createAsyncThunk(
-  "/home/delete-file",
+  "drive/delete-file",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     var response = await fetch(
       shareToken === null
-        ? `/home/delete-file?current_path=${params.current_path}&name=${params.name}`
-        : `/share/delete-file?current_path=${params.current_path}&name=${params.name}`,
+        ? `/api/drive/delete-file?current_path=${params.current_path}&name=${params.name}`
+        : `/api/drive/share/delete-file?current_path=${params.current_path}&name=${params.name}`,
       {
         headers:
           shareToken === null
@@ -337,15 +337,15 @@ export const delete_file = createAsyncThunk(
 );
 
 export const delete_folder = createAsyncThunk(
-  "/home/delete-folder",
+  "drive/delete-folder",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     var response = await fetch(
       shareToken === null
-        ? `/home/delete-folder?current_path=${params.current_path}&name=${params.name}`
-        : `/share/delete-folder?current_path=${params.current_path}&name=${params.name}`,
+        ? `/api/drive/delete-folder?current_path=${params.current_path}&name=${params.name}`
+        : `/api/drive/share/delete-folder?current_path=${params.current_path}&name=${params.name}`,
       {
         headers:
           shareToken === null
@@ -370,15 +370,15 @@ export const delete_folder = createAsyncThunk(
 );
 
 export const rename_file = createAsyncThunk(
-  "/home/rename-file",
+  "drive/rename-file",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     var response = await fetch(
       shareToken === null
-        ? `/home/rename-file?current_path=${params.current_path}&name=${params.name}&prev_name=${params.prev_name}`
-        : `/share/rename-file?current_path=${params.current_path}&name=${params.name}&prev_name=${params.prev_name}`,
+        ? `/api/drive/rename-file?current_path=${params.current_path}&name=${params.name}&prev_name=${params.prev_name}`
+        : `/api/drive/share/rename-file?current_path=${params.current_path}&name=${params.name}&prev_name=${params.prev_name}`,
       {
         headers:
           shareToken === null
@@ -403,15 +403,15 @@ export const rename_file = createAsyncThunk(
 );
 
 export const rename_folder = createAsyncThunk(
-  "/home/rename-folder",
+  "drive/rename-folder",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     var response = await fetch(
       shareToken === null
-        ? `/home/rename-folder?current_path=${params.current_path}&name=${params.name}&prev_name=${params.prev_name}`
-        : `/share/rename-folder?current_path=${params.current_path}&name=${params.name}&prev_name=${params.prev_name}`,
+        ? `/api/drive/rename-folder?current_path=${params.current_path}&name=${params.name}&prev_name=${params.prev_name}`
+        : `/api/drive/share/rename-folder?current_path=${params.current_path}&name=${params.name}&prev_name=${params.prev_name}`,
       {
         headers:
           shareToken === null
@@ -436,11 +436,11 @@ export const rename_folder = createAsyncThunk(
 );
 
 export const create_share = createAsyncThunk(
-  "home/share",
+  "drive/share",
   async (params, thunkAPI) => {
     console.log(params);
     var { username, session_id } = readCookies();
-    var response = await fetch("/home/share", {
+    var response = await fetch("/api/drive/share", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -468,8 +468,8 @@ export const create_share = createAsyncThunk(
   }
 );
 
-export const home = createSlice({
-  name: "home",
+export const drive = createSlice({
+  name: "drive",
   initialState: initialState,
   reducers: {
     setCurrentPath: (state, action) => {
@@ -605,5 +605,5 @@ export const home = createSlice({
   },
 });
 
-export const { clearState } = home.actions;
-export default home.reducer;
+export const { clearState } = drive.actions;
+export default drive.reducer;

@@ -1,5 +1,6 @@
 from elasticsearch import Elasticsearch
 
+from config import Elastic_URL
 from databaseConfig import Indexes, Mapping
 
 
@@ -9,7 +10,8 @@ class PhotosHandler:
         self.__username = username
         self.__es_username = es_username
         self.__es_password = es_password
-        self.__ES = Elasticsearch(http_auth=(self.__es_username, self.__es_password))
+        self.__ES = Elasticsearch(hosts=Elastic_URL,
+                                  http_auth=(self.__es_username, self.__es_password))
         self._CreateIndex()
 
     def _GetIndex(self):

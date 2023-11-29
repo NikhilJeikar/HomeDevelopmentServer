@@ -2,7 +2,7 @@ version: "3.7"
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:$ELASTIC_VERSION
-    container_name: ElasticDB
+    container_name: DB
     environment:
       node.name: es01
       cluster.name: $CLUSTER_NAME
@@ -14,9 +14,45 @@ services:
       - ./data:/usr/share/elasticsearch/data:rw
       - ./certs:/usr/share/elasticsearch/config/certs:rw
     ports:
-      - "127.0.0.1:9200:9200"
+      - "9200:9200"
+    networks:
+      network:
+        ipv4_address: 10.0.0.2
     healthcheck:
       test: ["CMD-SHELL", "curl --silent --fail localhost:9200/_cluster/health || exit 1"]
       interval: 10s
       timeout: 10s
       retries: 3
+
+  server:
+    container_name: Backend
+    build: backend/.
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../.:/server:rw
+    networks:
+      network:
+        ipv4_address: 10.0.0.3
+    command: bash -c "pip3 install --upgrade pip && pip3 install -r requirements.txt && python3.8 main.py"
+
+  nginx:
+    container_name: Frontend
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ../ui/build:/usr/share/nginx/html:rw
+      - ./frontend/nginx.conf:/etc/nginx/nginx.conf:rw
+    networks:
+      network:
+        ipv4_address: 10.0.0.4
+
+networks:
+  network:
+    driver: bridge
+    name: connection_bridge
+    ipam:
+      config:
+        - subnet: 10.0.0.0/16
+          gateway: 10.0.0.1

@@ -15,7 +15,7 @@ import { Row } from "./Row";
 
 export const ListView = ({setPath}) => {
   const { current_path, list, need_update } = useSelector(
-    (state) => state.home
+    (state) => state.drive
   );
   const dispatch = useDispatch();
 

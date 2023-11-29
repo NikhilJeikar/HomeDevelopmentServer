@@ -29,7 +29,7 @@ import {
 
 export const RowView = ({ details, handle,setPath }) => {
   var data = new Date(details.metadata.modified * 1000);
-  const { current_path } = useSelector((state) => state.home);
+  const { current_path } = useSelector((state) => state.drive);
   const [renameThis, setRenameThis] = React.useState(false);
   const [newName, setNewName] = React.useState(details.name);
   const dispatch = useDispatch();

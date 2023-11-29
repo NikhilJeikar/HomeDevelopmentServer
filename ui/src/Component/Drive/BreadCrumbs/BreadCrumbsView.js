@@ -7,7 +7,7 @@ import { file_list } from "../slice";
 
 export const CollapsedBreadcrumbsView = () => {
   const dispatch = useDispatch();
-  const { path_list } = useSelector((state) => state.home);
+  const { path_list } = useSelector((state) => state.drive);
   const handleClick = (event) => {
     event.preventDefault();
     dispatch(
