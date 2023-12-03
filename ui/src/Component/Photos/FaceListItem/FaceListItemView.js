@@ -1,10 +1,32 @@
-import { Avatar, ListItem, ListItemAvatar, ListItemText } from "@mui/material";
+import {
+  Avatar,
+  IconButton,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+} from "@mui/material";
 import { useState } from "react";
-
-export const FaceListItemView = ({ index, name, path, edit, makeEditable,rename }) => {
-  const [newName,setNewName] = useState(name)
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+export const FaceListItemView = ({
+  index,
+  name,
+  path,
+  edit,
+  makeEditable,
+  rename,
+  hide
+}) => {
+  const [newName, setNewName] = useState(name);
   return (
-    <ListItem>
+    <ListItem
+      secondaryAction={
+        <IconButton onClick={()=>{
+          hide()
+        }}>
+          <VisibilityOffIcon />
+        </IconButton>
+      }
+    >
       <ListItemAvatar>
         <Avatar src={path} />
       </ListItemAvatar>
@@ -13,22 +35,24 @@ export const FaceListItemView = ({ index, name, path, edit, makeEditable,rename 
           value={newName}
           readOnly={!edit}
           style={!edit ? { border: "none", outline: "none" } : null}
-          onDoubleClick={()=>{makeEditable(true)}}
+          onDoubleClick={() => {
+            makeEditable(true);
+          }}
           onChange={(e) => {
-              setNewName(e.target.value);
-            }}
+            setNewName(e.target.value);
+          }}
           onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                if (newName !== name || newName.trimEnd().length !== 0) {
-                  rename(newName);
-                }
-                makeEditable(false);
+            if (e.key === "Enter") {
+              if (newName !== name || newName.trimEnd().length !== 0) {
+                rename(newName);
               }
-            }}
-            onBlur={(e) => {
               makeEditable(false);
-              e.stopPropagation();
-            }}
+            }
+          }}
+          onBlur={(e) => {
+            makeEditable(false);
+            e.stopPropagation();
+          }}
         ></input>
       />
     </ListItem>

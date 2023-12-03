@@ -38,7 +38,6 @@ class FaceDetection:
         face_encodings = face_recognition.face_encodings(self.__image, face_locations)
         Faces = {}
         self.__PopulateEncoding()
-        print("Known faces", self.__KnownFaces.keys())
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
 
             matches = face_recognition.compare_faces(list(self.__KnownFaces.values()),
@@ -49,8 +48,6 @@ class FaceDetection:
                 face_distances = face_recognition.face_distance(list(self.__KnownFaces.values()),
                                                                 face_encoding)
                 best_match_index = np.argmin(face_distances)
-                print(matches,best_match_index,face_distances)
-                print(matches[best_match_index])
                 if matches[best_match_index]:
                     name = list(self.__KnownFaces.keys())[best_match_index]
                 else:
@@ -62,5 +59,4 @@ class FaceDetection:
                            "face_x2": right,
                            "face_y1": bottom,
                            "face_y2": top}
-        print(json.dumps(Faces, indent=4))
         return Faces

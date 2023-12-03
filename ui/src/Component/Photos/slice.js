@@ -8,13 +8,14 @@ const initialState = {
   face_blob_list: {},
   thumbnail_blob_list: {},
   picture_blob_list: {},
+  refresh_photo_list:false
 };
 
 export const fetch_faces = createAsyncThunk(
   "photo/fetch_faces",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
-    var response = await fetch("/api/photos/face/details?size=25&page=0", {
+    var response = await fetch("/api/photos/face/details", {
       method: "GET",
       headers: {
         user: username,
@@ -147,6 +148,32 @@ export const update_face_name = createAsyncThunk(
   }
 );
 
+export const set_visibility = createAsyncThunk(
+  "photo/set_visibility",
+  async (params, thunkAPI) => {
+    var { username, session_id } = readCookies();
+    var response = await fetch('/api/photos/face/set-visibility', {
+      method: "POST",
+      headers: {
+        user: username,
+        session: session_id,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body:JSON.stringify({
+        id:params.id,
+        hidden:params.hidden
+      })
+    });
+    var json = await response.json();
+    var status = await response.status;
+    if (status !== 200) {
+      return null;
+    }
+    return json;
+  }
+);
+
 
 export const photo = createSlice({
   name: "photo",
@@ -156,12 +183,14 @@ export const photo = createSlice({
     builder
       .addCase(fetch_faces.fulfilled, (state, action) => {
         state.face_list = action.payload.data
+        state.face_name_map= {}
         action.payload.data.map((value,index)=>{
           state.face_name_map[value.id] = value.name
         })
-
       })
-      .addCase(fetch_faces.pending, (state, action) => {})
+      .addCase(fetch_faces.pending, (state, action) => {
+        state.refresh_photo_list = false
+      })
       .addCase(fetch_faces.rejected, (state, action) => {})
       .addCase(fetch_image_details.fulfilled, (state, action) => {
         state.photo_list = action.payload.data;
@@ -183,8 +212,15 @@ export const photo = createSlice({
       })
       .addCase(fetch_face.pending, (state, action) => {})
       .addCase(fetch_face.rejected, (state, action) => {})
-      .addCase(update_face_name.fulfilled, (state, action) => {})
+      .addCase(update_face_name.fulfilled, (state, action) => {
+        state.refresh_photo_list = true
+      })
       .addCase(update_face_name.pending, (state, action) => {})
-      .addCase(update_face_name.rejected, (state, action) => {});
+      .addCase(update_face_name.rejected, (state, action) => {})
+      .addCase(set_visibility.fulfilled, (state, action) => {
+        state.refresh_photo_list = true
+      })
+      .addCase(set_visibility.pending, (state, action) => {})
+      .addCase(set_visibility.rejected, (state, action) => {});
   },
 });

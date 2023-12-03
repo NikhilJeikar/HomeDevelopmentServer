@@ -30,19 +30,21 @@ export const PhotoPopupView = ({
           context.lineWidth = 2;
           context.beginPath();
           details.faces.map((value, index) => {
-            context.rect(
-              value.face_x1,
-              value.face_y1,
-              value.face_x2 - value.face_x1,
-              value.face_y2 - value.face_y1
-            );
-            context.font = "30px Arial";
-            context.strokeText(
-              face_name_map[value.id],
-              value.face_x1,
-              value.face_y1 + 30
-            );
-            context.stroke();
+            if(face_name_map[value.id] != null){
+              context.rect(
+                value.face_x1,
+                value.face_y1,
+                value.face_x2 - value.face_x1,
+                value.face_y2 - value.face_y1
+              );
+              context.font = "30px Arial";
+              context.strokeText(
+                face_name_map[value.id],
+                value.face_x1,
+                value.face_y1 + 30
+              );
+              context.stroke();
+            }
           });
         };
       }

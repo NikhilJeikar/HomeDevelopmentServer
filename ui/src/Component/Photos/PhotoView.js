@@ -25,7 +25,7 @@ export const PhotosView = () => {
   const [constructed, setConstructed] = useState(false);
   const navigate = useNavigate();
 
-  const { face_list } = useSelector((state) => state.photo);
+  const { face_list, refresh_photo_list } = useSelector((state) => state.photo);
 
   const LogoutUser = () => {
     dispatch(logout());
@@ -41,6 +41,12 @@ export const PhotosView = () => {
     }
     setConstructed(true);
   });
+  useEffect(() => {
+    if (refresh_photo_list) {
+      console.log("Trigger")
+      dispatch(fetch_faces());
+    }
+  },[refresh_photo_list]);
 
   return (
     <Box sx={{ display: "flex" }} id="content">

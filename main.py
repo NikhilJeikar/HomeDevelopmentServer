@@ -10,7 +10,7 @@ from ftp.handler import FileHandle, ShareHandle
 from ftp.model import FileList, Create, CreateShared
 import os
 
-from photos.model import Rename
+from photos.model import Rename, SetVisibility
 from photos.watcher import GlobalWatcher
 from photos.handler import PhotosHandler, Trigger, FaceHandler
 
@@ -271,21 +271,27 @@ async def GetFace(path, x1, x2, y1, y2, user: str = Header()):
 
 
 @app.get("/api/photos/face/details", dependencies=[Depends(Authorize)])
-async def GetFaceDetails(page, size, user: str = Header()):
+async def GetFaceDetails(user: str = Header()):
     handler = FaceHandler(user, Elastic_Username, Elastic_Password)
     return handler.GetFaces()
 
 
 @app.get("/api/photos/face/detail", dependencies=[Depends(Authorize)])
-async def GetFaceDetails(id, user: str = Header()):
+async def GetFaceDetails(face_id: str, user: str = Header()):
     handler = FaceHandler(user, Elastic_Username, Elastic_Password)
-    return handler.GetFaces()
+    return handler.GetFace(face_id)
 
 
 @app.post("/api/photos/face/rename", dependencies=[Depends(Authorize)])
 async def RenameFace(body: Rename, user: str = Header()):
     handler = FaceHandler(user, Elastic_Username, Elastic_Password)
     return handler.SetName(body.id, body.name)
+
+
+@app.post("/api/photos/face/set-visibility", dependencies=[Depends(Authorize)])
+async def SetVisibility(body: SetVisibility, user: str = Header()):
+    handler = FaceHandler(user, Elastic_Username, Elastic_Password)
+    return handler.SetVisibility(body.id, body.hidden)
 
 
 if __name__ == '__main__':
