@@ -4,7 +4,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import Slide from "@mui/material/Slide";
-import { TextField } from "@mui/material";
+import { DialogTitle, TextField } from "@mui/material";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -18,14 +18,17 @@ export const PopupView = ({ title, open, handleClose, buttonText,onSubmit }) => 
         open={open}
         TransitionComponent={Transition}
         onClose={handleClose}
+        fullWidth={'xs'}
+        maxWidth={'xs'}
         margin="none"
       >
+      <DialogTitle>
+      {title}
+      </DialogTitle>
         <DialogContent>
           <TextField
-            value={name}
             margin="none"
-            // id="name"
-            label={title}
+            autoFocus
             onChange={(e) => {
               setName(e.target.value);
             }}
@@ -33,6 +36,12 @@ export const PopupView = ({ title, open, handleClose, buttonText,onSubmit }) => 
           />
         </DialogContent>
         <DialogActions>
+        <Button
+            onClick={handleClose}
+            margin="none"
+          >
+            Close
+          </Button>
           <Button
             onClick={() => {
               onSubmit(name);

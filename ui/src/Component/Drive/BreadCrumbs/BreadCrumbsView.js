@@ -1,7 +1,7 @@
 import * as React from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "@mui/material";
+import { Chip, Link } from "@mui/material";
 import { Folder, Home } from "@mui/icons-material";
 import { file_list } from "../slice";
 
@@ -17,31 +17,25 @@ export const CollapsedBreadcrumbsView = () => {
     );
   };
   return (
-    <Breadcrumbs maxItems={5} aria-label="breadcrumb">
-      <Link
+    <Breadcrumbs maxItems={5} aria-label="breadcrumb" >
+      <Chip
         key={0}
-        underline="hover"
-        color="inherit"
-        sx={{ display: 'flex', alignItems: 'center' }}
+        sx={{ display: "flex", alignItems: "center" }}
         onClick={handleClick}
         index={0}
-      >
-        <Home sx={{ mr: 0.5 }} fontSize="inherit" />
-        Home
-      </Link>
+        label="Home"
+        icon={<Home fontSize="small" />}
+      />
       {path_list.map((value, index) => {
         return (
-          <Link
+          <Chip
             key={index + 1}
-            underline="hover"
-            color="inherit"
             index={index + 1}
-            sx={{ display: 'flex', alignItems: 'center' }}
+            sx={{ display: "flex", alignItems: "center" }}
             onClick={handleClick}
-          >
-          <Folder sx={{ mr: 0.5 }} fontSize="inherit" />
-            {value}
-          </Link>
+            icon={<Folder fontSize="inherit" />}
+            label={value}
+            />
         );
       })}
     </Breadcrumbs>

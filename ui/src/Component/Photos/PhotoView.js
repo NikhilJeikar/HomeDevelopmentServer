@@ -9,20 +9,23 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { useNavigate } from "react-router-dom";
-import { Logout } from "@mui/icons-material";
+import { Home, Logout } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../slice";
-import { SetCookies } from "../../utils";
+import { SetCookies, readCookies } from "../../utils";
 import { fetch_faces, fetch_image_details } from "./slice";
 import { PhotoGrid } from "./Grid";
 import { useEffect, useState } from "react";
 import { FaceListItem } from "./FaceListItem";
+import { Avatar, Button, IconButton, Menu, MenuItem } from "@mui/material";
+import MoreIcon from "@mui/icons-material/MoreVert";
 
 const drawerWidth = 240;
 
 export const PhotosView = () => {
   const dispatch = useDispatch();
   const [constructed, setConstructed] = useState(false);
+  const [anchorElUser, setAnchorElUser] = useState(null);
   const navigate = useNavigate();
 
   const { face_list, refresh_photo_list } = useSelector((state) => state.photo);
@@ -33,6 +36,7 @@ export const PhotosView = () => {
 
     navigate("/");
   };
+  var { username } = readCookies();
 
   useEffect(() => {
     if (!constructed) {
@@ -48,16 +52,87 @@ export const PhotosView = () => {
     }
   },[refresh_photo_list]);
 
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
+
   return (
     <Box sx={{ display: "flex" }} id="content">
       <AppBar
         position="fixed"
+        color="transparent"
+        variant="dense"
+        elevation={0}
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
         <Toolbar variant="dense">
-          <Typography variant="h6" noWrap component="div">
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ display: { xs: "none", sm: "block" } }}
+          >
             Photos
           </Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <Button
+              variant="dense"
+              startIcon={<Home />}
+              onClick={() => {
+                navigate("/drive");
+              }}
+            >
+              Home
+            </Button>
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-haspopup="true"
+              color="inherit"
+              onClick={handleOpenUserMenu}
+            >
+              <Avatar>{username.toUpperCase().at(0)}</Avatar>
+            </IconButton>
+            <Menu
+              sx={{ mt: "45px" }}
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              <MenuItem onClick={handleCloseUserMenu}>
+                <Typography textAlign="center">Change Password</Typography>
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  LogoutUser();
+                  handleCloseUserMenu();
+                }}
+              >
+                <Typography textAlign="center">Logout</Typography>
+              </MenuItem>
+            </Menu>
+          </Box>
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <IconButton>
+              <MoreIcon />
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -97,20 +172,6 @@ export const PhotosView = () => {
             bottom: 0,
           }}
         >
-          <List>
-            <ListItem key={"Logout"} disablePadding>
-              <ListItemButton
-                variant="contained"
-                component="label"
-                onClick={LogoutUser}
-              >
-                <ListItemIcon>
-                  <Logout />
-                </ListItemIcon>
-                <ListItemText primary="Logout" />
-              </ListItemButton>
-            </ListItem>
-          </List>
         </Box>
       </Drawer>
       <Box
