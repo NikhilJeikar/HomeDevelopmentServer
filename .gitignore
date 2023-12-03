@@ -6,3 +6,4 @@ databaseConfig.py
 /docker/data/
 /docker/certs/
 /data/
+/encodings/

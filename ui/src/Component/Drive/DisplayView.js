@@ -92,7 +92,7 @@ export const DisplayView = () => {
       >
         <Toolbar variant="dense">
           <Typography variant="h6" noWrap component="div">
-            Development Server
+            Drive
           </Typography>
         </Toolbar>
       </AppBar>

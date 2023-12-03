@@ -4,18 +4,19 @@ from starlette.requests import Request
 
 from auth.handler import ElasticLoginHandler
 from auth.model import AccountLogin
-from config import Elastic_Username, Elastic_Password
+from config import Elastic_Username, Elastic_Password, FTP_BASE_PATH
 
 from ftp.handler import FileHandle, ShareHandle
 from ftp.model import FileList, Create, CreateShared
 import os
 
+from photos.model import Rename
 from photos.watcher import GlobalWatcher
+from photos.handler import PhotosHandler, Trigger, FaceHandler
 
 app = FastAPI()
 
 LoginHandle = ElasticLoginHandler(Elastic_Username, Elastic_Password)
-Watcher = GlobalWatcher()
 
 
 async def Authorize(user: str = Header(), session: str = Header()):
@@ -245,5 +246,49 @@ async def RenameFolder(current_path, prev_name, name, user: str = Header(), shar
     return ShareHandler.RenameFolder(prev_name, name)
 
 
+@app.get("/api/photos/thumbnail", dependencies=[Depends(Authorize)])
+async def GetThumbnail(path, user: str = Header()):
+    handler = PhotosHandler(user, Elastic_Username, Elastic_Password)
+    return handler.GetThumbnail(path)
+
+
+@app.get("/api/photos/photo", dependencies=[Depends(Authorize)])
+async def GetPhoto(path, user: str = Header()):
+    handler = PhotosHandler(user, Elastic_Username, Elastic_Password)
+    return handler.GetPhoto(path)
+
+
+@app.get("/api/photos/details", dependencies=[Depends(Authorize)])
+async def GetPhotoDetails(page, size, user: str = Header()):
+    handler = PhotosHandler(user, Elastic_Username, Elastic_Password)
+    return handler.PhotoList(page, size)
+
+
+@app.get("/api/photos/face", dependencies=[Depends(Authorize)])
+async def GetFace(path, x1, x2, y1, y2, user: str = Header()):
+    handler = PhotosHandler(user, Elastic_Username, Elastic_Password)
+    return handler.GetFace(path, x1, x2, y1, y2)
+
+
+@app.get("/api/photos/face/details", dependencies=[Depends(Authorize)])
+async def GetFaceDetails(page, size, user: str = Header()):
+    handler = FaceHandler(user, Elastic_Username, Elastic_Password)
+    return handler.GetFaces()
+
+
+@app.get("/api/photos/face/detail", dependencies=[Depends(Authorize)])
+async def GetFaceDetails(id, user: str = Header()):
+    handler = FaceHandler(user, Elastic_Username, Elastic_Password)
+    return handler.GetFaces()
+
+
+@app.post("/api/photos/face/rename", dependencies=[Depends(Authorize)])
+async def RenameFace(body: Rename, user: str = Header()):
+    handler = FaceHandler(user, Elastic_Username, Elastic_Password)
+    return handler.SetName(body.id, body.name)
+
+
 if __name__ == '__main__':
-    uvicorn.run(app="main:app", host="0.0.0.0", port=8000, reload=True, workers=16)
+    Watcher = GlobalWatcher()
+    Watcher.start_watcher(FTP_BASE_PATH, Trigger)
+    uvicorn.run(app="main:app", host="0.0.0.0", port=8000, workers=16, reload=True)

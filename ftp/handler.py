@@ -51,10 +51,6 @@ class FileHandle:
         try:
             current_time = time.time()
             print(self.__current_path)
-            print({"File": name, "Path": os.path.join(self.__current_path, name),
-                   "Shared": 0, "Author": self.__username if username is None else username,
-                   "created": current_time,
-                   "modified": current_time})
             self.__db_handler.AddEntry(
                 {"File": name, "Path": os.path.join(self.__current_path, name),
                  "Shared": 0, "Author": self.__username if username is None else username,

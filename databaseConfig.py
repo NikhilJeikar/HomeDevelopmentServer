@@ -3,7 +3,8 @@ Indexes = {
     "Session": "session",
     "Files": "files",
     "Shared": "shared",
-    "Photos": "photos"
+    "Photos": "photos",
+    "Faces": "faces"
 }
 
 Mapping = {
@@ -52,8 +53,10 @@ Mapping = {
             "path": {"type": "text"},
             "is_photo": {"type": "boolean"},
             "faces": {"type": "nested", "properties": {
-                "face_x": {"type": "double"},
-                "face_y": {"type": "double"},
+                "face_x1": {"type": "double"},
+                "face_x2": {"type": "double"},
+                "face_y1": {"type": "double"},
+                "face_y2": {"type": "double"},
                 "id": {"type": "keyword"},
             }},
             "comments": {"type": "nested", "properties": {
@@ -61,16 +64,21 @@ Mapping = {
                 "comment": {"type": "text"},
                 "commented_at": {"type": "double"},
             }},
+            "width": {"type": "double"},
+            "height": {"type": "double"},
             "edit": {"type": "boolean"},
             "updated_at": {"type": "double"},
             "created_at": {"type": "double"},
-            "latest": {"type": "boolean"},
-        }},
-        "faces": {"type": "nested", "properties": {
-            "id": {"type": "keyword"},
-            "name": {"type": "keyword"},
-            "hidden": {"type": "boolean"},
-            "default_pic_path": {"type": "text"},
         }}
     }},
+    "Faces": {"properties": {
+        "id": {"type": "keyword"},
+        "name": {"type": "keyword"},
+        "hidden": {"type": "boolean"},
+        "face_x1": {"type": "double"},
+        "face_x2": {"type": "double"},
+        "face_y1": {"type": "double"},
+        "face_y2": {"type": "double"},
+        "default_pic_path": {"type": "text"},
+    }}
 }
