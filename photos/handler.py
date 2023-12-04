@@ -90,11 +90,7 @@ class PhotosHandler:
             self.__ES.indices.create(index=self._GetIndex(), mappings=Mapping[self.__Index])
 
     def AddFile(self, path: str, time: float):
-        file = open("out.log", "a")
-        file.write(f"Path {path} \n")
-
         if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png"):
-            file.write(f"Analysing {path} \n")
             detect = FaceDetection(self.__username, path)
             height, width = detect.GetDimension()
             path = path.replace(os.path.join(self.__FTPBasePath, self.__username), "")
@@ -127,7 +123,6 @@ class PhotosHandler:
             else:
                 data['photo']['created_at'] = time
                 self.__ES.create(index=self._GetIndex(), id=path, document=data)
-        file.close()
 
     def DeleteFile(self, path: str):
         path = os.path.join(os.path.join(self.__FTPBasePath, self.__username), path)

@@ -50,7 +50,6 @@ class FileHandle:
     def CreateFolder(self, name, username=None):
         try:
             current_time = time.time()
-            print(self.__current_path)
             self.__db_handler.AddEntry(
                 {"File": name, "Path": os.path.join(self.__current_path, name),
                  "Shared": 0, "Author": self.__username if username is None else username,
@@ -116,7 +115,6 @@ class FileHandle:
                             len(self.__base_path.split(os.path.sep)) + 1:]}
 
     def List(self, name=None):
-        print(self.__current_path)
         if name is None:
             dir_list = []
             for i in os.listdir(self.__current_path):
