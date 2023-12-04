@@ -1,30 +1,78 @@
+import MoreIcon from "@mui/icons-material/MoreVert";
 import {
   Avatar,
   IconButton,
   ListItem,
   ListItemAvatar,
   ListItemText,
+  MenuItem,
+  Menu,
+  Typography,
 } from "@mui/material";
-import { useState } from "react";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { useEffect, useState } from "react";
 export const FaceListItemView = ({
-  index,
   name,
   path,
   edit,
   makeEditable,
   rename,
-  hide
+  hide,
 }) => {
   const [newName, setNewName] = useState(name);
+  const [anchorElUser, setAnchorElUser] = useState(null);
+
+  useEffect(()=>{
+    setNewName(name);
+  },[name])
+  
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
   return (
     <ListItem
       secondaryAction={
-        <IconButton onClick={()=>{
-          hide()
-        }}>
-          <VisibilityOffIcon />
-        </IconButton>
+        <div>
+          <IconButton onClick={handleOpenUserMenu}>
+            <MoreIcon />
+          </IconButton>
+          <Menu
+            sx={{ mt: "45px" }}
+            anchorEl={anchorElUser}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            open={Boolean(anchorElUser)}
+            onClose={handleCloseUserMenu}
+          >
+            <MenuItem
+              onClick={() => {
+                hide();
+                handleCloseUserMenu();
+              }}
+            >
+              <Typography textAlign="center">Hide</Typography>
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                makeEditable(true);
+                handleCloseUserMenu();
+              }}
+            >
+              <Typography textAlign="center">Rename</Typography>
+            </MenuItem>
+          </Menu>
+        </div>
       }
     >
       <ListItemAvatar>
@@ -32,6 +80,7 @@ export const FaceListItemView = ({
       </ListItemAvatar>
       <ListItemText
         primary=<input
+        autoFocus
           value={newName}
           readOnly={!edit}
           style={!edit ? { border: "none", outline: "none" } : null}

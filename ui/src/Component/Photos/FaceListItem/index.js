@@ -11,7 +11,7 @@ export const FaceListItem = ({ index, name, id, path, x1, x2, y1, y2 }) => {
     dispatch(
       fetch_face({ id: id, path: path, x1: x1, x2: x2, y1: y1, y2: y2 })
     );
-  }, [path]);
+  }, [path,dispatch,id,x1,x2,y1,y2]);
   const rename = (name) =>{
     dispatch(update_face_name({id:id,name:name}))
   }
