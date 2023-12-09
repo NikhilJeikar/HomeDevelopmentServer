@@ -24,29 +24,34 @@ export const PhotosView = () => {
   const [anchorElUser, setAnchorElUser] = useState(null);
   const navigate = useNavigate();
 
-  const { face_list, refresh_photo_list } = useSelector((state) => state.photo);
+  const { face_list, refresh_photo_list, loaded_page, selected_list } =
+    useSelector((state) => state.photo);
 
   const LogoutUser = () => {
     dispatch(logout());
     SetCookies(null, null);
-
     navigate("/");
   };
   var { username } = readCookies();
 
   useEffect(() => {
     if (!constructed) {
-      dispatch(fetch_image_details());
+      let content = [];
+      for (let i = 0; i < selected_list.length; i++) {
+        content.push(selected_list[i].id)
+      }
+      console.log(content,selected_list)
+      dispatch(fetch_image_details({id:content}));
       dispatch(fetch_faces());
-    }else{
+    } else {
       setConstructed(true);
     }
-  },[constructed, dispatch]);
+  }, [constructed, dispatch, loaded_page, selected_list]);
   useEffect(() => {
     if (refresh_photo_list) {
       dispatch(fetch_faces());
     }
-  },[dispatch, refresh_photo_list]);
+  }, [dispatch, refresh_photo_list]);
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
@@ -55,7 +60,6 @@ export const PhotosView = () => {
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
-
 
   return (
     <Box sx={{ display: "flex" }} id="content">
@@ -87,7 +91,6 @@ export const PhotosView = () => {
               Home
             </Button>
             <IconButton
-              size="large"
               edge="end"
               aria-label="account of current user"
               aria-haspopup="true"
@@ -167,15 +170,13 @@ export const PhotosView = () => {
             position: "absolute",
             bottom: 0,
           }}
-        >
-        </Box>
+        ></Box>
       </Drawer>
       <Box
         component="main"
         style={{ paddingLeft: 15, paddingTop: 0 }}
         sx={{ flexGrow: 1, p: 3 }}
       >
-        <Toolbar variant="dense" />
         <PhotoGrid />
       </Box>
     </Box>

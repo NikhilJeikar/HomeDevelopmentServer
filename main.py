@@ -10,7 +10,7 @@ from ftp.handler import FileHandle, ShareHandle
 from ftp.model import FileList, Create, CreateShared
 import os
 
-from photos.model import Rename, SetVisibility
+from photos.model import Rename, SetVisibility, FetchDetails
 from photos.watcher import GlobalWatcher
 from photos.handler import PhotosHandler, Trigger, FaceHandler
 
@@ -258,10 +258,10 @@ async def GetPhoto(path, user: str = Header()):
     return handler.GetPhoto(path)
 
 
-@app.get("/api/photos/details", dependencies=[Depends(Authorize)])
-async def GetPhotoDetails(page, size, user: str = Header()):
+@app.post("/api/photos/details", dependencies=[Depends(Authorize)])
+async def GetPhotoDetails(data: FetchDetails, user: str = Header()):
     handler = PhotosHandler(user, Elastic_Username, Elastic_Password)
-    return handler.PhotoList(page, size)
+    return handler.PhotoList(data.id)
 
 
 @app.get("/api/photos/face", dependencies=[Depends(Authorize)])
@@ -297,4 +297,4 @@ async def SetVisibility(body: SetVisibility, user: str = Header()):
 if __name__ == '__main__':
     Watcher = GlobalWatcher()
     Watcher.start_watcher(FTP_BASE_PATH, Trigger)
-    uvicorn.run(app="main:app", host="0.0.0.0", port=8000, workers=16, reload=True)
+    uvicorn.run(app="main:app", host="0.0.0.0", port=8000, workers=16)

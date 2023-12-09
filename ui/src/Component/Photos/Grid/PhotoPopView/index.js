@@ -16,7 +16,7 @@ export const PhotoPopup = ({
 
   useEffect(() => {
     if (picture_blob_list[details.path] == null) {
-      dispatch(fetch_image(details.path));
+      dispatch(fetch_image({path:details.path}));
     }
   }, [details, dispatch, picture_blob_list]);
 

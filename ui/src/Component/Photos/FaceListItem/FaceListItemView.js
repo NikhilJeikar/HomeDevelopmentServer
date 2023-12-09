@@ -17,6 +17,8 @@ export const FaceListItemView = ({
   makeEditable,
   rename,
   hide,
+  id,
+  add_filter
 }) => {
   const [newName, setNewName] = useState(name);
   const [anchorElUser, setAnchorElUser] = useState(null);
@@ -35,6 +37,7 @@ export const FaceListItemView = ({
 
   return (
     <ListItem
+    onClick={()=>{add_filter(name,path,id)}}
       secondaryAction={
         <div>
           <IconButton onClick={handleOpenUserMenu}>

@@ -4,9 +4,11 @@ import { useState } from "react";
 import { PhotoPopup } from "./PhotoPopView";
 
 export const PhotoGrid = () => {
-  const { photo_list } = useSelector((state) => state.photo);
+  const { photo_list} = useSelector((state) => state.photo);
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
+  
+
   if (photo_list.length !== 0) {
     return (
       <div>

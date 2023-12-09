@@ -9,6 +9,7 @@ const initialState = {
   thumbnail_blob_list: {},
   picture_blob_list: {},
   refresh_photo_list: false,
+  selected_list: [],
 };
 
 export const fetch_faces = createAsyncThunk(
@@ -39,13 +40,35 @@ export const fetch_image_details = createAsyncThunk(
   "photo/fetch_image_details",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
-    var response = await fetch("/api/photos/details?size=25&page=0", {
-      method: "GET",
-      headers: {
-        user: username,
-        session: session_id,
-      },
-    });
+    var content =
+      params.id.length !== 0
+        ? {
+            method: "POST",
+            headers: {
+              user: username,
+              session: session_id,
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify({
+              id: params.id,
+            }),
+          }
+        : {
+            method: "POST",
+            headers: {
+              user: username,
+              session: session_id,
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+
+            body: JSON.stringify({
+              id: [],
+            }),
+          };
+    var response = await fetch(`/api/photos/details`, content);
     var json = await response.json();
     var status = await response.status;
     if (status !== 200) {
@@ -63,7 +86,7 @@ export const fetch_thumbnail_image = createAsyncThunk(
   "photo/fetch_thumbnail_image",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
-    var response = await fetch(`/api/photos/thumbnail?path=${params}`, {
+    var response = await fetch(`/api/photos/thumbnail?path=${params.path}`, {
       method: "GET",
       headers: {
         user: username,
@@ -76,7 +99,7 @@ export const fetch_thumbnail_image = createAsyncThunk(
       return null;
     }
     const objectURL = URL.createObjectURL(blob);
-    return { path: params, url: objectURL };
+    return { path: params.path, url: objectURL };
   }
 );
 
@@ -84,7 +107,7 @@ export const fetch_image = createAsyncThunk(
   "photo/fetch_image",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
-    var response = await fetch(`/api/photos/photo?path=${params}`, {
+    var response = await fetch(`/api/photos/photo?path=${params.path}`, {
       method: "GET",
       headers: {
         user: username,
@@ -97,7 +120,7 @@ export const fetch_image = createAsyncThunk(
       return null;
     }
     const objectURL = URL.createObjectURL(blob);
-    return { path: params, url: objectURL };
+    return { path: params.path, url: objectURL };
   }
 );
 
@@ -180,7 +203,35 @@ export const set_visibility = createAsyncThunk(
 export const photo = createSlice({
   name: "photo",
   initialState: initialState,
-  reducers: {},
+  reducers: {
+    add_filter: (state, action) => {
+      const { name, path, id } = action.payload;
+      let index = -1;
+      for (let i = 0; i < state.selected_list.length; i++) {
+        if (state.selected_list[i].id === id) {
+          index = i;
+        }
+      }
+      if (index === -1) {
+        state.selected_list.push({ name: name, path: path, id: id });
+      }
+    },
+    remove_filter: (state, action) => {
+      const { id } = action.payload;
+      let index = -1;
+      for (let i = 0; i < state.selected_list.length; i++) {
+        if (state.selected_list[i].id === id) {
+          index = i;
+        }
+      }
+      if (index !== -1) {
+        state.selected_list.splice(index, 1);
+      }
+    },
+    clear_filter: (state, action) => {
+      state.selected_list = [];
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetch_faces.fulfilled, (state, action) => {
@@ -188,7 +239,7 @@ export const photo = createSlice({
         state.face_name_map = {};
         action.payload.data.map((value, index) => {
           state.face_name_map[value.id] = value.name;
-          return null
+          return null;
         });
       })
       .addCase(fetch_faces.pending, (state, action) => {
@@ -201,21 +252,33 @@ export const photo = createSlice({
       .addCase(fetch_image_details.pending, (state, action) => {})
       .addCase(fetch_image_details.rejected, (state, action) => {})
       .addCase(fetch_thumbnail_image.fulfilled, (state, action) => {
-        if (action.payload != null && action.payload.path !== null && action.payload.path !== undefined) {
+        if (
+          action.payload != null &&
+          action.payload.path !== null &&
+          action.payload.path !== undefined
+        ) {
           state.thumbnail_blob_list[action.payload.path] = action.payload.url;
         }
       })
       .addCase(fetch_thumbnail_image.pending, (state, action) => {})
       .addCase(fetch_thumbnail_image.rejected, (state, action) => {})
       .addCase(fetch_image.fulfilled, (state, action) => {
-        if (action.payload != null && action.payload.path !== null && action.payload.path !== undefined) {
+        if (
+          action.payload != null &&
+          action.payload.path !== null &&
+          action.payload.path !== undefined
+        ) {
           state.picture_blob_list[action.payload.path] = action.payload.url;
         }
       })
       .addCase(fetch_image.pending, (state, action) => {})
       .addCase(fetch_image.rejected, (state, action) => {})
       .addCase(fetch_face.fulfilled, (state, action) => {
-        if (action.payload != null && action.payload.path !== null && action.payload.path !== undefined) {
+        if (
+          action.payload != null &&
+          action.payload.path !== null &&
+          action.payload.path !== undefined
+        ) {
           state.face_blob_list[action.payload.path] = action.payload.url;
         }
       })
@@ -233,3 +296,11 @@ export const photo = createSlice({
       .addCase(set_visibility.rejected, (state, action) => {});
   },
 });
+
+export const {
+  add_filter,
+  remove_filter,
+  clear_filter,
+  triggered_fetch_image_details,
+} = photo.actions;
+export default photo.reducer;

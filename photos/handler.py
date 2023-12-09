@@ -139,25 +139,48 @@ class PhotosHandler:
         img = cv2.imread(path)
         height, width = img.shape[:2]
         aspect_ratio = height / width
-        res, im_png = cv2.imencode(".png", cv2.resize(img, (
+        res, im_png = cv2.imencode(".jpeg", cv2.resize(img, (
             int(256), int(256 * aspect_ratio)), ))
-        return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/png")
+        return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/jpeg")
 
     def GetPhoto(self, path: str):
         path = os.path.join(os.path.join(self.__FTPBasePath, self.__username), path)
         img = cv2.imread(path)
-        res, im_png = cv2.imencode(".png", img)
-        return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/png")
+        res, im_png = cv2.imencode(".jpeg", img)
+        return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/jpeg")
 
     def GetFace(self, path: str, x1: int, x2: int, y1: int, y2: int):
         path = os.path.join(os.path.join(self.__FTPBasePath, self.__username), path)
         img = cv2.imread(path)
-        res, im_png = cv2.imencode(".png", img[int(y2):int(y1), int(x1):int(x2)])
-        return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/png")
+        res, im_png = cv2.imencode(".jpeg", img[int(y2):int(y1), int(x1):int(x2)])
+        return StreamingResponse(io.BytesIO(im_png.tobytes()), media_type="image/jpeg")
 
-    def PhotoList(self, page=0, size=25):
-        results = self.__ES.search(index=self._GetIndex(), body={"query": {"match_all": {}}},
-                                   from_=page, size=size)
+    def PhotoList(self, data):
+        if len(data) != 0:
+            query = {"nested": {
+                "path": "photo",
+                "query": {
+                    "nested": {
+                        "path": "photo.faces",
+                        "query": {
+                            "bool": {
+                                "should": [
+                                    {
+                                        "match": {
+                                            "photo.faces.id": i
+                                        }
+                                    }
+                                    for i in data
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+            }
+        else:
+            query = {"match_all": {}}
+        results = self.__ES.search(index=self._GetIndex(), size=10000, query=query)
         return [i["_source"] for i in results["hits"]["hits"]]
 
 

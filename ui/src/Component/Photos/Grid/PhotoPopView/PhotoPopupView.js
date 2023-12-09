@@ -92,7 +92,6 @@ export const PhotoPopupView = ({
             ref={canvas_named_ref}
             height={details.height}
             width={details.width}
-            style={{ width: "100%" }}
             onMouseEnter={() => {
               setOnHover(true);
             }}
@@ -105,7 +104,6 @@ export const PhotoPopupView = ({
             ref={canvas_unnamed_ref}
             height={details.height}
             width={details.width}
-            style={{ width: "100%" }}
             onMouseEnter={() => {
               setOnHover(true);
             }}

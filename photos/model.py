@@ -1,3 +1,5 @@
+from typing import Union
+
 from pydantic import BaseModel
 
 
@@ -9,3 +11,7 @@ class Rename(BaseModel):
 class SetVisibility(BaseModel):
     id: str
     hidden: bool
+
+
+class FetchDetails(BaseModel):
+    id: list

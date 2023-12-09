@@ -7,7 +7,9 @@ export const GridCard = ({ path, onClick,index }) => {
   const dispatch = useDispatch();
   const { thumbnail_blob_list } = useSelector((state) => state.photo);
   useEffect(() => {
-    dispatch(fetch_thumbnail_image(path));
+    if(thumbnail_blob_list[path] === null ||thumbnail_blob_list[path] === undefined){
+      dispatch(fetch_thumbnail_image({path:path}));
+    }
   }, [path,dispatch]);
   return (
     <CardView

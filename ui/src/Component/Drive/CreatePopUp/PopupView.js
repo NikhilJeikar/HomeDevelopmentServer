@@ -18,7 +18,7 @@ export const PopupView = ({ title, open, handleClose, buttonText,onSubmit }) => 
         open={open}
         TransitionComponent={Transition}
         onClose={handleClose}
-        fullWidth={'xs'}
+        fullWidth
         maxWidth={'xs'}
         margin="none"
       >
