@@ -135,7 +135,6 @@ export const RowView = ({ details, handle, setPath }) => {
             }}
             onDoubleClick={(e) => {
               window.clearTimeout(timeout);
-              console.log("Double click")
               timeout = null;
               setRenameThis(true);
               e.stopPropagation();
@@ -154,10 +153,8 @@ export const RowView = ({ details, handle, setPath }) => {
             }}
             onClick={(e) => {
               e.stopPropagation();
-              console.log("Single click")
               if (timeout === null) {
                 timeout = window.setTimeout(() => {
-                  console.log("Timeout Single click")
                   timeout = null;
                   if (details.is_dir) {
                     handle(details.name);

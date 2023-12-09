@@ -44,7 +44,6 @@ export const PhotosView = () => {
   },[constructed, dispatch]);
   useEffect(() => {
     if (refresh_photo_list) {
-      console.log("Trigger")
       dispatch(fetch_faces());
     }
   },[dispatch, refresh_photo_list]);

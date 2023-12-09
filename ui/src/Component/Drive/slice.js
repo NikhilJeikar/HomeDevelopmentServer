@@ -438,7 +438,6 @@ export const rename_folder = createAsyncThunk(
 export const create_share = createAsyncThunk(
   "drive/share",
   async (params, thunkAPI) => {
-    console.log(params);
     var { username, session_id } = readCookies();
     var response = await fetch("/api/drive/share", {
       method: "POST",

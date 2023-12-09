@@ -48,7 +48,6 @@ export const SharePopupView = ({ open, handleClose, fileName,popupStatus }) => {
           <Button
             variant="contained"
             onClick={() => {
-              console.log("Hi");
               dispatch(
                 create_share({ read: value === "view", path: path_list + [fileName]})
               ).then((data) => {

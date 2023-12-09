@@ -46,7 +46,6 @@ export const PhotoPopupView = ({
               return null;
             });
           };
-          console.log("Called named");
         }
       }
     },
