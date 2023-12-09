@@ -1,7 +1,7 @@
 import * as React from "react";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import { useDispatch, useSelector } from "react-redux";
-import { Chip, Link } from "@mui/material";
+import { Chip } from "@mui/material";
 import { Folder, Home } from "@mui/icons-material";
 import { file_list } from "../slice";
 

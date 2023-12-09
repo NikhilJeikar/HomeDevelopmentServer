@@ -21,10 +21,10 @@ export const FaceListItemView = ({
   const [newName, setNewName] = useState(name);
   const [anchorElUser, setAnchorElUser] = useState(null);
 
-  useEffect(()=>{
+  useEffect(() => {
     setNewName(name);
-  },[name])
-  
+  }, [name]);
+
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -80,10 +80,10 @@ export const FaceListItemView = ({
       </ListItemAvatar>
       <ListItemText
         primary=<input
-        autoFocus
+          autoFocus
           value={newName}
           readOnly={!edit}
-          style={!edit ? { border: "none", outline: "none" } : null}
+          style={!edit ? { border: "none", outline: "none" ,width: "-webkit-fill-available"} : {width: "-webkit-fill-available"}}
           onDoubleClick={() => {
             makeEditable(true);
           }}

@@ -12,13 +12,13 @@ export const PhotoPopup = ({
   onNext,
 }) => {
   const dispatch = useDispatch();
-  const { picture_blob_list,face_list } = useSelector((state) => state.photo);
+  const { picture_blob_list } = useSelector((state) => state.photo);
 
   useEffect(() => {
     if (picture_blob_list[details.path] == null) {
       dispatch(fetch_image(details.path));
     }
-  }, [details]);
+  }, [details, dispatch, picture_blob_list]);
 
   return (
     <PhotoPopupView

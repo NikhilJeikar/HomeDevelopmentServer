@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { change_folder, file_list } from "../slice";
 import {
-  Paper,
   Table,
   TableBody,
   TableCell,

@@ -38,15 +38,16 @@ export const PhotosView = () => {
     if (!constructed) {
       dispatch(fetch_image_details());
       dispatch(fetch_faces());
+    }else{
+      setConstructed(true);
     }
-    setConstructed(true);
-  });
+  },[constructed, dispatch]);
   useEffect(() => {
     if (refresh_photo_list) {
       console.log("Trigger")
       dispatch(fetch_faces());
     }
-  },[refresh_photo_list]);
+  },[dispatch, refresh_photo_list]);
 
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
