@@ -29,13 +29,14 @@ import {
 import { useEffect, useState } from "react";
 
 export const RowView = ({ details, handle, setPath }) => {
+  const queryParameters = new URLSearchParams(window.location.search);
+  const shareToken = queryParameters.get("share");
   var data = new Date(details.metadata.modified * 1000);
   const { current_path } = useSelector((state) => state.drive);
   const [renameThis, setRenameThis] = useState(false);
   const [newName, setNewName] = useState(details.name);
   const dispatch = useDispatch();
   let timeout = null;
-
   const download = (e) => {
     if (details.is_dir) {
       dispatch(
@@ -126,9 +127,16 @@ export const RowView = ({ details, handle, setPath }) => {
                 ? {
                     border: "none",
                     outline: "none",
+                    width: newName.length * 8,
+                    minWidth: 100,
+                    maxWidth: 200,
                     backgroundColor: "#efefef",
                   }
-                : null
+                : {
+                    width: newName.length * 8,
+                    minWidth: 100,
+                    maxWidth: 200,
+                  }
             }
             onChange={(e) => {
               setNewName(e.target.value);
@@ -193,7 +201,7 @@ export const RowView = ({ details, handle, setPath }) => {
               <Download style={{ paddingLeft: 5 }} />
             </IconButton>
           </Tooltip>
-          {details.is_dir ? (
+          {details.is_dir && shareToken=== null ? (
             <Tooltip title="Share" placement="left" arrow>
               <IconButton
                 onClick={(e) => {

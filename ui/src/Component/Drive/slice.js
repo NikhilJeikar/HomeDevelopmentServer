@@ -1,5 +1,11 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { readCookies } from "../../utils";
+import {
+  add_file,
+  crash_download,
+  finish_download,
+  start_download,
+} from "./UploadProgress/slice";
 
 const initialState = {
   current_path: "",
@@ -17,7 +23,9 @@ export const file_list = createAsyncThunk(
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     var response = await fetch(
-      shareToken === null ? "/api/drive/file-list" : "/api/drive/share/file-list",
+      shareToken === null
+        ? "/api/drive/file-list"
+        : "/api/drive/share/file-list",
       {
         method: "POST",
         headers:
@@ -61,7 +69,9 @@ export const create_file = createAsyncThunk(
     const shareToken = queryParameters.get("share");
     var { username, session_id } = readCookies();
     var response = await fetch(
-      shareToken === null ? "/api/drive/create-file" : "/api/drive/share/create-file",
+      shareToken === null
+        ? "/api/drive/create-file"
+        : "/api/drive/share/create-file",
       {
         method: "POST",
         headers:
@@ -102,7 +112,9 @@ export const create_folder = createAsyncThunk(
     const shareToken = queryParameters.get("share");
     var { username, session_id } = readCookies();
     var response = await fetch(
-      shareToken === null ? "/api/drive/create-folder" : "/api/drive/share/create-folder",
+      shareToken === null
+        ? "/api/drive/create-folder"
+        : "/api/drive/share/create-folder",
       {
         method: "POST",
         headers:
@@ -143,7 +155,9 @@ export const change_folder = createAsyncThunk(
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     var response = await fetch(
-      shareToken === null ? "/api/drive/change-folder" : "/api/drive/share/change-folder",
+      shareToken === null
+        ? "/api/drive/change-folder"
+        : "/api/drive/share/change-folder",
       {
         method: "POST",
         headers:
@@ -187,8 +201,11 @@ export const upload_file = createAsyncThunk(
     const queryParameters = new URLSearchParams(window.location.search);
     const shareToken = queryParameters.get("share");
     const func = async (file, path) => {
+      const controller = new AbortController();
+      const { signal } = controller;
       let data = new FormData();
       data.append("files", file, file.name);
+      thunkAPI.dispatch(start_download({ path: file.name, close: controller }));
       var response = await fetch(
         shareToken === null
           ? `/api/drive/upload-file?path=${path.toString()}`
@@ -207,13 +224,16 @@ export const upload_file = createAsyncThunk(
                   share: shareToken,
                 },
           body: data,
+          signal: signal,
         }
       );
       var json = await response.json();
       var status = await response.status;
       if (status !== 200) {
+        thunkAPI.dispatch(crash_download({ path: file.name }));
         return thunkAPI.rejectWithValue(status);
       }
+      thunkAPI.dispatch(finish_download({ path: file.name }));
       return {
         failed: false,
         list: json.list,
@@ -221,7 +241,11 @@ export const upload_file = createAsyncThunk(
         dir_list: json.dir_list,
       };
     };
-    for (var i = 0; i < params.file.length; i++) {
+    let i = 0;
+    for (i = 0; i < params.file.length; i++) {
+      thunkAPI.dispatch(add_file({ path: params.file[i].name }));
+    }
+    for (i = 0; i < params.file.length; i++) {
       await func(params.file[i], params.path);
     }
   }

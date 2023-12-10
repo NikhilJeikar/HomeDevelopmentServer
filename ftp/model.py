@@ -34,7 +34,7 @@ class Download(BaseModel):
 
 
 class CreateShared(BaseModel):
-    path: str
+    path: Union[str, List[str]]
     linkParam: str = None
     username: str = None
     read: bool

@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Row } from "./Row";
 
-export const ListView = ({setPath}) => {
+export const ListView = ({ setPath }) => {
   const { current_path, list, need_update } = useSelector(
     (state) => state.drive
   );
@@ -33,27 +33,34 @@ export const ListView = ({setPath}) => {
   };
 
   return (
-    <TableContainer elevation={0} color="transparent">
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+    <TableContainer elevation={0} style={{ height: "85vh", overflow: "auto" }}>
+      <Table stickyHeader sx={{ minWidth: 650 }}>
         <TableHead>
           <TableRow>
-            <TableCell>
+            <TableCell style={{ backgroundColor: "#efefef" }}>
               <Typography>Name</Typography>
             </TableCell>
-            <TableCell>
+            <TableCell style={{ backgroundColor: "#efefef" }}>
               <Typography>Author</Typography>
             </TableCell>
-            <TableCell>
+            <TableCell style={{ backgroundColor: "#efefef" }}>
               <Typography>Modified at</Typography>
             </TableCell>
-            <TableCell align="center">
+            <TableCell align="center" style={{ backgroundColor: "#efefef" }}>
               <Typography>Action</Typography>
             </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {list.map((value, index) => {
-            return <Row key={index} details={value} handle={directory_click} setPath={setPath}/>;
+            return (
+              <Row
+                key={index}
+                details={value}
+                handle={directory_click}
+                setPath={setPath}
+              />
+            );
           })}
         </TableBody>
       </Table>

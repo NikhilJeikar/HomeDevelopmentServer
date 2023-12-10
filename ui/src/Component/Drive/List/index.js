@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ListView } from "./ListView";
 import { SharePopup } from "./SharePopup";
 import { ClipBoardCopy } from "./ClipBoardCopy";
+import { UploadProgress } from "../UploadProgress";
 
 export const ListWindow = () => {
   const [filePath, setFilePath] = useState();
@@ -18,7 +19,7 @@ export const ListWindow = () => {
         handleClose={() => {
           setFilePath(null);
         }}
-        filePath={filePath}
+        fileName={filePath}
         popupStatus={(message)=>{setClipboardOpen(message)}}
       />
       <ClipBoardCopy
@@ -26,6 +27,7 @@ export const ListWindow = () => {
         handleClose={()=>{setClipboardOpen('')}}
         message = {clipBoardOpen}
       />
+      <UploadProgress/>
     </div>
   );
 };

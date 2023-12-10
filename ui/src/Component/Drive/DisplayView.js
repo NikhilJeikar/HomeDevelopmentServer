@@ -24,7 +24,6 @@ import { SetCookies, readCookies } from "../../utils";
 import { CollapsedBreadcrumbs } from "./BreadCrumbs";
 import { ListWindow } from "./List";
 import IconButton from "@mui/material/IconButton";
-import MoreIcon from "@mui/icons-material/MoreVert";
 import { Avatar, Button, Card, CardContent } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
@@ -101,7 +100,7 @@ export const DisplayView = () => {
             Drive
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+          <Box sx={{ display: { xs: "flex", md: "flex" } }}>
             <Button
               variant="dense"
               startIcon={<Camera />}
@@ -112,7 +111,6 @@ export const DisplayView = () => {
               Photos
             </Button>
             <IconButton
-              size="large"
               edge="end"
               aria-label="account of current user"
               aria-haspopup="true"
@@ -148,11 +146,6 @@ export const DisplayView = () => {
                 <Typography textAlign="center">Logout</Typography>
               </MenuItem>
             </Menu>
-          </Box>
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            <IconButton>
-              <MoreIcon />
-            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
@@ -234,7 +227,7 @@ export const DisplayView = () => {
         >
         </Box>
       </Drawer>
-      <Box style={{ padding: 12 }} sx={{ flexGrow: 1, height: "100%" ,marginTop:1}}>
+      <Box style={{ padding: 12}} sx={{ flexGrow: 1 ,marginTop:1}}>
         <Toolbar variant="dense" />
         <Popup
           open={folderPopup}
@@ -244,7 +237,7 @@ export const DisplayView = () => {
           buttonText="Create"
         />
         <Box
-          sx={{ height: "100%", width: "100%", display: "inline-block" }}
+          sx={{ width: "100%", display: "inline-block" }}
           component={"main"}
         >
           <Card
@@ -253,10 +246,9 @@ export const DisplayView = () => {
               backgroundColor: "#efefef",
               display: "flex",
               flexDirection: "column",
-              height: "100%",
             }}
           >
-            <CardContent style={{ flex: 1, paddingBottom: 0 }}>
+            <CardContent style={{ flex: 1, paddingBottom: 0}}>
               <CollapsedBreadcrumbs Path={path_list} />
               <ListWindow />
             </CardContent>
