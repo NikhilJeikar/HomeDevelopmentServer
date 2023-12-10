@@ -138,7 +138,6 @@ class FileHandle:
 
     def ChangeDirectory(self, name):
         self.__current_path = os.path.join(self.__current_path, name)
-        print(f"current path {self.__current_path}")
         if os.path.exists(self.__current_path):
             return {"dir": os.path.sep.join(
                 self.__current_path.split(os.path.sep)[

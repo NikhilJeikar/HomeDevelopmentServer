@@ -167,7 +167,6 @@ async def ChangedDirectoryShare(body: Create, share: str = Header(), user: str =
 async def FileListShare(body: FileList, share: str = Header(), user: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
-    print(f"path {body.json()}")
     if type(body.current_path) == str:
         ShareHandler.ChangeDirectory(body.current_path)
     elif type(body.current_path) == list:
