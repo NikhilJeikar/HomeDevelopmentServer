@@ -1,21 +1,32 @@
 import { CardView } from "./CardView";
 import { useDispatch, useSelector } from "react-redux";
-import { fetch_thumbnail_image } from "../../slice";
-import { useEffect } from "react";
+import {
+  add_thumbnail_request_queue,
+  fetch_thumbnail_image,
+} from "../../slice";
 
-export const GridCard = ({ path, onClick,index }) => {
+export const GridCard = ({ path, onClick, index }) => {
   const dispatch = useDispatch();
-  const { thumbnail_blob_list } = useSelector((state) => state.photo);
-  useEffect(() => {
-    if(thumbnail_blob_list[path] === null ||thumbnail_blob_list[path] === undefined){
-      dispatch(fetch_thumbnail_image({path:path}));
+  const { thumbnail_blob_list, thumbnail_on_request } = useSelector(
+    (state) => state.photo
+  );
+  const callback = () => {
+    if (
+      (thumbnail_blob_list[path] === null ||
+        thumbnail_blob_list[path] === undefined) &&
+      thumbnail_on_request[path] !== true
+    ) {
+      dispatch(add_thumbnail_request_queue({ path: path }));
+      dispatch(fetch_thumbnail_image({ path: path }));
     }
-  }, [path,dispatch]);
+  };
+
   return (
     <CardView
       path={thumbnail_blob_list[path]}
       onClick={onClick}
       index={index}
+      callback={callback}
     />
   );
 };

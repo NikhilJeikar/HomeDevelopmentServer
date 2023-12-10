@@ -19,7 +19,7 @@ export const PopupView = ({ title, open, handleClose, buttonText,onSubmit }) => 
         TransitionComponent={Transition}
         onClose={handleClose}
         fullWidth
-        maxWidth={'xs'}
+        maxWidth='xs'
         margin="none"
       >
       <DialogTitle>

@@ -40,7 +40,6 @@ export const PhotosView = () => {
       for (let i = 0; i < selected_list.length; i++) {
         content.push(selected_list[i].id)
       }
-      console.log(content,selected_list)
       dispatch(fetch_image_details({id:content}));
       dispatch(fetch_faces());
     } else {
@@ -80,7 +79,7 @@ export const PhotosView = () => {
             Photos
           </Typography>
           <Box sx={{ flexGrow: 1 }} />
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+          <Box sx={{ display: { xs: "fles", md: "flex" } }}>
             <Button
               variant="dense"
               startIcon={<Home />}
@@ -126,11 +125,6 @@ export const PhotosView = () => {
                 <Typography textAlign="center">Logout</Typography>
               </MenuItem>
             </Menu>
-          </Box>
-          <Box sx={{ display: { xs: "flex", md: "none" } }}>
-            <IconButton>
-              <MoreIcon />
-            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>

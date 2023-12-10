@@ -7,6 +7,7 @@ const initialState = {
   face_name_map: {},
   face_blob_list: {},
   thumbnail_blob_list: {},
+  thumbnail_on_request:{},
   picture_blob_list: {},
   refresh_photo_list: false,
   selected_list: [],
@@ -231,6 +232,14 @@ export const photo = createSlice({
     clear_filter: (state, action) => {
       state.selected_list = [];
     },
+    add_thumbnail_request_queue:(state,action) =>{
+      const { path} = action.payload;
+      state.thumbnail_on_request[path] = true
+    },
+    remove_thumbnail_request_queue:(state,action) =>{
+      const { path} = action.payload;
+      state.thumbnail_on_request[path] = false
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -302,5 +311,7 @@ export const {
   remove_filter,
   clear_filter,
   triggered_fetch_image_details,
+  add_thumbnail_request_queue,
+  remove_thumbnail_request_queue
 } = photo.actions;
 export default photo.reducer;

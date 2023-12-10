@@ -1,5 +1,5 @@
 import { GridCard } from "./Card";
-import { ImageList, Toolbar } from "@mui/material";
+import { Grid, Toolbar } from "@mui/material";
 import { Filter } from "./Filter";
 
 export const PhotoGridView = ({ files, onClick }) => {
@@ -7,7 +7,7 @@ export const PhotoGridView = ({ files, onClick }) => {
     <div
       style={{
         display: "flex",
-        "flexDirection": "column",
+        flexDirection: "column",
         overflow: "hidden",
         height: "97vh",
       }}
@@ -25,18 +25,23 @@ export const PhotoGridView = ({ files, onClick }) => {
           }
         }}
       >
-        <ImageList variant="masonry" cols={4} style={{ marginTop: 0 }}>
+        <Grid
+          container
+          columns={{ xs: 4, sm: 8, md: 12 }}
+          spacing={{ xs: 2, md: 3 }}
+          style={{ marginTop: 0 }}
+        >
           {files.map((value, index) => {
             return (
-              <GridCard
-                key={index}
-                index={index}
-                path={value["photo"]["path"]}
-                onClick={onClick}
-              />
+                <GridCard
+                  key={index}
+                  index={index}
+                  path={value["photo"]["path"]}
+                  onClick={onClick}
+                />
             );
           })}
-        </ImageList>
+        </Grid>
       </div>
     </div>
   );
