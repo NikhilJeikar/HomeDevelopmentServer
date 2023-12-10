@@ -148,6 +148,8 @@ async def RenameFolder(current_path, prev_name, name, user: str = Header()):
 
 @app.post("/api/drive/share", dependencies=[Depends(Authorize)])
 async def GetSharedLink(data: CreateShared, user: str = Header()):
+    if type(data.path) == list:
+        data.path = os.path.sep.join(data.path)
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     data.username = user
     return ShareHandler.GetSharableToken(data)
@@ -161,10 +163,11 @@ async def ChangedDirectoryShare(body: Create, share: str = Header(), user: str =
     return ShareHandler.ChangeDirectory(body.name)
 
 
-@app.post("/api/drive/share/file-list")
+@app.post("/api/drive/share/file-list", dependencies=[Depends(Authorize)])
 async def FileListShare(body: FileList, share: str = Header(), user: str = Header()):
     ShareHandler = ShareHandle(Elastic_Username, Elastic_Password)
     ShareHandler.AccessSharedToken(share)
+    print(f"path {body.json()}")
     if type(body.current_path) == str:
         ShareHandler.ChangeDirectory(body.current_path)
     elif type(body.current_path) == list:
@@ -297,4 +300,4 @@ async def SetVisibility(body: SetVisibility, user: str = Header()):
 if __name__ == '__main__':
     Watcher = GlobalWatcher()
     Watcher.start_watcher(FTP_BASE_PATH, Trigger)
-    uvicorn.run(app="main:app", host="0.0.0.0", port=8000, workers=16)
+    uvicorn.run(app="main:app", host="0.0.0.0", port=8000, workers=16, reload=True)

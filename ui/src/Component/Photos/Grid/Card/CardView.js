@@ -1,11 +1,10 @@
-import { Card, CardMedia, Grid } from "@mui/material";
+import { Card, CardMedia, Fade, Grid, Tooltip } from "@mui/material";
 import { useEffect, useRef } from "react";
 
-export const CardView = ({ path, onClick, index, callback }) => {
+export const CardView = ({ path, onClick, index, callback, file_path }) => {
   const ref = useRef();
   useEffect(() => {
     const observer = new IntersectionObserver(([entry]) =>
-      // setIntersecting(entry.isIntersecting)
       entry.isIntersecting ? callback() : null
     );
 
@@ -13,7 +12,7 @@ export const CardView = ({ path, onClick, index, callback }) => {
     return () => {
       observer.disconnect();
     };
-  }, [ref,callback]);
+  }, [ref, callback]);
   return (
     <Grid ref={ref} item xs={2} sm={4} md={4} key={index}>
       <Card
@@ -22,12 +21,14 @@ export const CardView = ({ path, onClick, index, callback }) => {
           onClick(index);
         }}
       >
-        <CardMedia
-          component="img"
-          height="255"
-          image={path}
-          style={{ objectFit: "contain" }}
-        ></CardMedia>
+        <Tooltip title={file_path} TransitionComponent={Fade}>
+          <CardMedia
+            component="img"
+            height="255"
+            image={path}
+            style={{ objectFit: "contain" }}
+          />
+        </Tooltip>
       </Card>
     </Grid>
   );

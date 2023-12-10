@@ -14,7 +14,6 @@ import { PhotoGrid } from "./Grid";
 import { useEffect, useState } from "react";
 import { FaceListItem } from "./FaceListItem";
 import { Avatar, Button, IconButton, Menu, MenuItem } from "@mui/material";
-import MoreIcon from "@mui/icons-material/MoreVert";
 
 const drawerWidth = 240;
 

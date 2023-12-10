@@ -24,6 +24,7 @@ export const GridCard = ({ path, onClick, index }) => {
   return (
     <CardView
       path={thumbnail_blob_list[path]}
+      file_path={path}
       onClick={onClick}
       index={index}
       callback={callback}

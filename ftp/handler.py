@@ -111,8 +111,7 @@ class FileHandle:
                 os.path.join(self.__current_path, i[0]))["_source"]})
         return {"list": ret, "dir": os.path.sep.join(
             self.__current_path.split(os.path.sep)[len(self.__base_path.split(os.path.sep)) + 1:]),
-                "dir_list": self.__current_path.split(os.path.sep)[
-                            len(self.__base_path.split(os.path.sep)) + 1:]}
+                "dir_list": [i for i in self.__current_path.split(os.path.sep)[len(self.__base_path.split(os.path.sep)) + 1:]if len(i) != 0 and i != '.' ]}
 
     def List(self, name=None):
         if name is None:
@@ -139,6 +138,7 @@ class FileHandle:
 
     def ChangeDirectory(self, name):
         self.__current_path = os.path.join(self.__current_path, name)
+        print(f"current path {self.__current_path}")
         if os.path.exists(self.__current_path):
             return {"dir": os.path.sep.join(
                 self.__current_path.split(os.path.sep)[

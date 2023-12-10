@@ -10,7 +10,13 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const PopupView = ({ title, open, handleClose, buttonText,onSubmit }) => {
+export const PopupView = ({
+  title,
+  open,
+  handleClose,
+  buttonText,
+  onSubmit,
+}) => {
   const [name, setName] = React.useState("");
   return (
     <React.Fragment>
@@ -19,12 +25,10 @@ export const PopupView = ({ title, open, handleClose, buttonText,onSubmit }) => 
         TransitionComponent={Transition}
         onClose={handleClose}
         fullWidth
-        maxWidth='xs'
+        maxWidth="xs"
         margin="none"
       >
-      <DialogTitle>
-      {title}
-      </DialogTitle>
+        <DialogTitle>{title}</DialogTitle>
         <DialogContent>
           <TextField
             margin="none"
@@ -36,14 +40,12 @@ export const PopupView = ({ title, open, handleClose, buttonText,onSubmit }) => 
           />
         </DialogContent>
         <DialogActions>
-        <Button
-            onClick={handleClose}
-            margin="none"
-          >
+          <Button onClick={handleClose} margin="none">
             Close
           </Button>
           <Button
             onClick={() => {
+              handleClose();
               onSubmit(name);
             }}
             margin="none"
