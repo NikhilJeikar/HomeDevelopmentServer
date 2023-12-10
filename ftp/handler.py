@@ -9,10 +9,10 @@ import zipfile
 import io
 import shutil
 import uuid
+
+from config import Elastic_URL, FTP_BASE_PATH
 from databaseConfig import Indexes, Mapping
 from ftp.model import CreateShared
-
-FTP_BASE_PATH = "."
 
 
 class FileHandle:
@@ -109,11 +109,12 @@ class FileHandle:
         for i in file_list:
             ret.append({"name": i[0], "is_dir": i[1], "metadata": self.__db_handler.GetDetails(
                 os.path.join(self.__current_path, i[0]))["_source"]})
-        return {"list": ret, "dir": os.path.sep.join(self.__current_path.split(os.path.sep)[2:]),
-                "dir_list": self.__current_path.split(os.path.sep)[2:]}
+        return {"list": ret, "dir": os.path.sep.join(
+            self.__current_path.split(os.path.sep)[len(self.__base_path.split(os.path.sep)) + 1:]),
+                "dir_list": self.__current_path.split(os.path.sep)[
+                            len(self.__base_path.split(os.path.sep)) + 1:]}
 
     def List(self, name=None):
-        print(self.__current_path)
         if name is None:
             dir_list = []
             for i in os.listdir(self.__current_path):
@@ -129,19 +130,21 @@ class FileHandle:
 
     def SetCurrentDirectory(self, path):
         if len(path) == 0:
-            path = ['.', self.__username]
+            path = [self.__username]
         else:
             path = path.split(os.path.sep)
-            path = ['.', self.__username] + path
+            path = [self.__username] + path
         path = os.path.sep.join(path)
-        self.__current_path = path
+        self.__current_path = os.path.join(self.__base_path, path)
 
     def ChangeDirectory(self, name):
         self.__current_path = os.path.join(self.__current_path, name)
-        print(f"Current Path {self.__current_path}")
         if os.path.exists(self.__current_path):
-            return {"dir": os.path.sep.join(self.__current_path.split(os.path.sep)[2:]),
-                    "dir_list": self.__current_path.split(os.path.sep)[2:]}
+            return {"dir": os.path.sep.join(
+                self.__current_path.split(os.path.sep)[
+                len(self.__base_path.split(os.path.sep)) + 1:]),
+                "dir_list": self.__current_path.split(os.path.sep)[
+                            len(self.__base_path.split(os.path.sep)) + 1:]}
         else:
             raise HTTPException(status_code=404, detail="Invalid path")
 
@@ -208,7 +211,8 @@ class DBHandle:
         self.__username = username
         self.__es_username = es_username
         self.__es_password = es_password
-        self.__ES = Elasticsearch(http_auth=(self.__es_username, self.__es_password))
+        self.__ES = Elasticsearch(hosts=Elastic_URL,
+                                  http_auth=(self.__es_username, self.__es_password))
         self._CreateIndex()
 
     def _GetIndex(self):
@@ -242,7 +246,8 @@ class ShareHandle:
         self.__Index = "Shared"
         self.__es_username = es_username
         self.__es_password = es_password
-        self.__ES = Elasticsearch(http_auth=(self.__es_username, self.__es_password))
+        self.__ES = Elasticsearch(hosts=Elastic_URL,
+                                  http_auth=(self.__es_username, self.__es_password))
         self._CreateIndex()
         self.__User = None
         self.__FileHandle = None

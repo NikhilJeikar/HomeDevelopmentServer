@@ -4,11 +4,13 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
-      <excludeFolder url="file://$MODULE_DIR$/Docker/certs" />
-      <excludeFolder url="file://$MODULE_DIR$/Docker/data" />
       <excludeFolder url="file://$MODULE_DIR$/nikhil" />
       <excludeFolder url="file://$MODULE_DIR$/ui/build" />
       <excludeFolder url="file://$MODULE_DIR$/ui/node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/docker/certs" />
+      <excludeFolder url="file://$MODULE_DIR$/docker/data" />
+      <excludeFolder url="file://$MODULE_DIR$/data" />
+      <excludeFolder url="file://$MODULE_DIR$/encodings" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.9 (Home-FTP-Server)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

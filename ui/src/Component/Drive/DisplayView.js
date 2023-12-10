@@ -11,49 +11,42 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { useNavigate } from "react-router-dom";
 import {
+  Camera,
   CreateNewFolder,
   DriveFolderUpload,
-  Logout,
-  NoteAdd,
   UploadFile,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../slice";
 import { Popup } from "./CreatePopUp";
-import { create_file, create_folder, upload_file,clearState } from "./slice";
-import { SetCookies } from "../../utils";
+import { create_folder, upload_file, clearState } from "./slice";
+import { SetCookies, readCookies } from "../../utils";
 import { CollapsedBreadcrumbs } from "./BreadCrumbs";
 import { ListWindow } from "./List";
+import IconButton from "@mui/material/IconButton";
+import MoreIcon from "@mui/icons-material/MoreVert";
+import { Avatar, Button, Card, CardContent } from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
+import Menu from "@mui/material/Menu";
 
 const drawerWidth = 240;
 
 export const DisplayView = () => {
   const dispatch = useDispatch();
 
-  const { current_path, path_list } = useSelector((state) => state.home);
+  const { current_path, path_list } = useSelector((state) => state.drive);
 
   const [folderPopup, setFolderPopup] = React.useState(false);
-  const [filePopup, setFilePopup] = React.useState(false);
+  const [anchorElUser, setAnchorElUser] = React.useState(null);
 
-  const { authorized } = useSelector((state) => state.home);
+  const { authorized } = useSelector((state) => state.drive);
+  var { username } = readCookies();
   React.useEffect(() => {
     if (!authorized) {
-        navigate("/");
+      navigate("/");
     }
   });
   const navigate = useNavigate();
-
-  const CreateFile = (name) => {
-    if (name !== "") {
-      dispatch(
-        create_file({
-          name: name,
-          current_path: current_path,
-        })
-      );
-    }
-    setFilePopup(false);
-  };
 
   const CreateFolder = (name) => {
     if (name !== "") {
@@ -70,30 +63,97 @@ export const DisplayView = () => {
     setFolderPopup(false);
   };
 
-  const CloseFile = () => {
-    setFilePopup(false);
-  };
-
   const UploadFileFunction = (files) => {
     dispatch(upload_file({ file: files, path: current_path }));
   };
-  
+
   const LogoutUser = () => {
     dispatch(logout());
-    SetCookies(null,null)
+    SetCookies(null, null);
     dispatch(clearState());
     navigate("/");
   };
+
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
   return (
-    <Box sx={{ display: "flex" }} id="content">
+    <Box sx={{ display: "flex" }}>
       <AppBar
         position="fixed"
+        color="transparent"
+        variant="dense"
+        elevation={0}
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
         <Toolbar variant="dense">
-          <Typography variant="h6" noWrap component="div">
-            Development Server
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ display: { xs: "none", sm: "block" } }}
+          >
+            Drive
           </Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <Button
+              variant="dense"
+              startIcon={<Camera />}
+              onClick={() => {
+                navigate("/photo");
+              }}
+            >
+              Photos
+            </Button>
+            <IconButton
+              size="large"
+              edge="end"
+              aria-label="account of current user"
+              aria-haspopup="true"
+              color="inherit"
+              onClick={handleOpenUserMenu}
+            >
+              <Avatar>{username.toUpperCase().at(0)}</Avatar>
+            </IconButton>
+            <Menu
+              sx={{ mt: "45px" }}
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              <MenuItem onClick={handleCloseUserMenu}>
+                <Typography textAlign="center">Change Password</Typography>
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  LogoutUser();
+                  handleCloseUserMenu();
+                }}
+              >
+                <Typography textAlign="center">Logout</Typography>
+              </MenuItem>
+            </Menu>
+          </Box>
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <IconButton>
+              <MoreIcon />
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -150,18 +210,6 @@ export const DisplayView = () => {
                 <ListItemText primary="Upload Folder" />
               </ListItemButton>
             </ListItem>
-            <ListItem key={"create file"} disablePadding>
-              <ListItemButton
-                onClick={() => {
-                  setFilePopup(true);
-                }}
-              >
-                <ListItemIcon>
-                  <NoteAdd />
-                </ListItemIcon>
-                <ListItemText primary="Create File" />
-              </ListItemButton>
-            </ListItem>
             <ListItem key={"create folder"} disablePadding>
               <ListItemButton
                 onClick={() => {
@@ -184,40 +232,36 @@ export const DisplayView = () => {
             bottom: 0,
           }}
         >
-          <List>
-            <ListItem key={"Logout"} disablePadding>
-              <ListItemButton
-                variant="contained"
-                component="label"
-                onClick={LogoutUser}
-              >
-                <ListItemIcon>
-                  <Logout />
-                </ListItemIcon>
-                <ListItemText primary="Logout" />
-              </ListItemButton>
-            </ListItem>
-          </List>
         </Box>
       </Drawer>
-      <Box component="main" style={{ padding: 12 }} sx={{ flexGrow: 1, p: 3 }}>
+      <Box style={{ padding: 12 }} sx={{ flexGrow: 1, height: "100%" ,marginTop:1}}>
         <Toolbar variant="dense" />
         <Popup
-          open={filePopup}
-          title={"Filename"}
-          handleClose={CloseFile}
-          onSubmit={CreateFile}
-          buttonText="Create"
-        />
-        <Popup
           open={folderPopup}
-          title={"Foldername"}
+          title={"New folder"}
           handleClose={CloseFolder}
           onSubmit={CreateFolder}
           buttonText="Create"
         />
-        <CollapsedBreadcrumbs Path={path_list} />
-        <ListWindow/>
+        <Box
+          sx={{ height: "100%", width: "100%", display: "inline-block" }}
+          component={"main"}
+        >
+          <Card
+            elevation={0}
+            style={{
+              backgroundColor: "#efefef",
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+            }}
+          >
+            <CardContent style={{ flex: 1, paddingBottom: 0 }}>
+              <CollapsedBreadcrumbs Path={path_list} />
+              <ListWindow />
+            </CardContent>
+          </Card>
+        </Box>
       </Box>
     </Box>
   );

@@ -11,7 +11,7 @@ const initialState = {
 export const login = createAsyncThunk(
   "user/login",
   async (params, thunkAPI) => {
-    var response = await fetch("/user/login_user", {
+    var response = await fetch("/api/user/login_user", {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -39,7 +39,7 @@ export const authorize = createAsyncThunk(
   "user/authorize",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
-    var response = await fetch("/user/authorize", {
+    var response = await fetch("/api/user/authorize", {
       method: "POST",
       headers: {
         user: username,
@@ -63,7 +63,7 @@ export const logout = createAsyncThunk(
   "user/logout",
   async (params, thunkAPI) => {
     var { username, session_id } = readCookies();
-    var response = await fetch("/user/logout", {
+    var response = await fetch("/api/user/logout", {
       method: "POST",
       headers: {
         user: username,

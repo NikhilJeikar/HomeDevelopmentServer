@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { change_folder, file_list } from "../slice";
 import {
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -15,7 +14,7 @@ import { Row } from "./Row";
 
 export const ListView = ({setPath}) => {
   const { current_path, list, need_update } = useSelector(
-    (state) => state.home
+    (state) => state.drive
   );
   const dispatch = useDispatch();
 
@@ -34,7 +33,7 @@ export const ListView = ({setPath}) => {
   };
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer elevation={0} color="transparent">
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>

@@ -17,7 +17,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export const SharePopupView = ({ open, handleClose, fileName,popupStatus }) => {
   const [value, setValue] = React.useState("edit");
   const dispatch = useDispatch();
-  const { path_list } = useSelector((state) => state.home);
+  const { path_list } = useSelector((state) => state.drive);
   return (
     <React.Fragment>
       <Dialog
@@ -48,7 +48,6 @@ export const SharePopupView = ({ open, handleClose, fileName,popupStatus }) => {
           <Button
             variant="contained"
             onClick={() => {
-              console.log("Hi");
               dispatch(
                 create_share({ read: value === "view", path: path_list + [fileName]})
               ).then((data) => {

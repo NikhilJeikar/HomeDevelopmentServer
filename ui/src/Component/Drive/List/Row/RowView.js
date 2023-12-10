@@ -1,4 +1,3 @@
-import * as React from "react";
 import IconButton from "@mui/material/IconButton";
 import ShareIcon from "@mui/icons-material/Share";
 import {
@@ -19,6 +18,7 @@ import {
 } from "../../slice";
 import {
   Avatar,
+  Icon,
   ListItem,
   ListItemIcon,
   ListItemText,
@@ -26,13 +26,15 @@ import {
   TableRow,
   Tooltip,
 } from "@mui/material";
+import { useEffect, useState } from "react";
 
-export const RowView = ({ details, handle,setPath }) => {
+export const RowView = ({ details, handle, setPath }) => {
   var data = new Date(details.metadata.modified * 1000);
-  const { current_path } = useSelector((state) => state.home);
-  const [renameThis, setRenameThis] = React.useState(false);
-  const [newName, setNewName] = React.useState(details.name);
+  const { current_path } = useSelector((state) => state.drive);
+  const [renameThis, setRenameThis] = useState(false);
+  const [newName, setNewName] = useState(details.name);
   const dispatch = useDispatch();
+  let timeout = null;
 
   const download = (e) => {
     if (details.is_dir) {
@@ -97,7 +99,7 @@ export const RowView = ({ details, handle,setPath }) => {
     e.stopPropagation();
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setNewName(details.name);
   }, [details.name]);
   return (
@@ -112,22 +114,28 @@ export const RowView = ({ details, handle,setPath }) => {
     >
       <TableCell component="th" scope="row" padding="none">
         <ListItemIcon>
-          <Avatar
-            sx={{ width: 30, height: 30 }}
-            variant="square"
-            style={{ marginLeft: 5, marginRight: 5 }}
-          >
+          <Icon style={{ marginLeft: 5, marginRight: 5 }}>
             {details.is_dir ? <Folder /> : <Description />}
-          </Avatar>
+          </Icon>
           <input
             autoFocus
             value={newName}
             readOnly={!renameThis}
-            style={!renameThis ? { border: "none", outline: "none" } : null}
+            style={
+              !renameThis
+                ? {
+                    border: "none",
+                    outline: "none",
+                    backgroundColor: "#efefef",
+                  }
+                : null
+            }
             onChange={(e) => {
               setNewName(e.target.value);
             }}
             onDoubleClick={(e) => {
+              window.clearTimeout(timeout);
+              timeout = null;
               setRenameThis(true);
               e.stopPropagation();
             }}
@@ -144,8 +152,14 @@ export const RowView = ({ details, handle,setPath }) => {
               e.stopPropagation();
             }}
             onClick={(e) => {
-              if (renameThis) {
-                e.stopPropagation();
+              e.stopPropagation();
+              if (timeout === null) {
+                timeout = window.setTimeout(() => {
+                  timeout = null;
+                  if (details.is_dir) {
+                    handle(details.name);
+                  }
+                }, 300);
               }
             }}
           ></input>
@@ -179,16 +193,18 @@ export const RowView = ({ details, handle,setPath }) => {
               <Download style={{ paddingLeft: 5 }} />
             </IconButton>
           </Tooltip>
-          {details.is_dir ?<Tooltip title="Share" placement="left" arrow>
-            <IconButton
-              onClick={(e) => {
-                setPath(details.name)
-                e.stopPropagation();
-              }}
-            >
-              <ShareIcon style={{ paddingLeft: 5 }} />
-            </IconButton>
-          </Tooltip>:null}
+          {details.is_dir ? (
+            <Tooltip title="Share" placement="left" arrow>
+              <IconButton
+                onClick={(e) => {
+                  setPath(details.name);
+                  e.stopPropagation();
+                }}
+              >
+                <ShareIcon style={{ paddingLeft: 5 }} />
+              </IconButton>
+            </Tooltip>
+          ) : null}
           <Tooltip title="Delete" placement="left" arrow>
             <IconButton onClick={delete_request}>
               <Delete style={{ paddingLeft: 5 }} />

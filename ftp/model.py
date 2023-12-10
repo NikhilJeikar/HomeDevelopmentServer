@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Union
+from typing import Union, List
 
 from pydantic import BaseModel
 import time
@@ -8,7 +8,7 @@ import time
 
 class FileList(BaseModel):
     username: str = None
-    current_path: Union[str, list[str]]
+    current_path: Union[str, List[str]]
     time: float = time.time()
 
 
