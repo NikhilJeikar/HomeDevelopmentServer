@@ -27,6 +27,11 @@ services:
   server:
     container_name: Backend
     build: backend/.
+    depends_on:
+      elasticsearch:
+        condition: service_started
+      nginx:
+        condition: service_started
     ports:
       - "8000:8000"
     volumes:
@@ -34,7 +39,7 @@ services:
     networks:
       network:
         ipv4_address: 10.0.0.3
-    command: bash -c "pip3 install --upgrade pip && pip3 install -r requirements.txt && python3.8 main.py"
+    command: python3.8 main.py
 
   nginx:
     container_name: Frontend

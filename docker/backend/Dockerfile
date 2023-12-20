@@ -17,4 +17,8 @@ RUN cd Python-3.8.2 && make install
 
 RUN rm -rf Python-3.8.2
 
+COPY requirements.txt requirements.txt
+RUN pip3 install wheel==0.42.0
+RUN pip3 install -U pip setuptools
+RUN pip3 install -r requirements.txt
 WORKDIR /server
