@@ -28,10 +28,7 @@ services:
     container_name: Backend
     build: backend/.
     depends_on:
-      elasticsearch:
-        condition: service_started
-      nginx:
-        condition: service_started
+      - elasticsearch
     ports:
       - "8000:8000"
     volumes:
@@ -39,7 +36,7 @@ services:
     networks:
       network:
         ipv4_address: 10.0.0.3
-    command: python3.8 main.py
+    command: bash /trigger.sh elasticsearch 9200 python3.8 main.py
 
   nginx:
     container_name: Frontend
