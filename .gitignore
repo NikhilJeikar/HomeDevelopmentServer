@@ -7,3 +7,6 @@ databaseConfig.py
 /docker/certs/
 /data/
 /encodings/
+
+*.pyc
+*.out

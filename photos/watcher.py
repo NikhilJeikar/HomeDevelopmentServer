@@ -1,43 +1,54 @@
 import os
-import threading
 from time import sleep
 from threading import Thread
-from collections import defaultdict
 
 
 class LocalWatcher:
-    def __init__(self, folder_path, trigger):
+    def __init__(self, folder_path, trigger, global_watcher):
         self.__FolderPath = folder_path
         self.__Trigger = trigger
         self.__Old = {}
         self.__Kill = False
         self.__Thread = None
-        self.__PrevFiles = set()
+        self.__PrevFiles = None
         self.__CurrentFiles = set()
+        self.__Global_Watcher = global_watcher
 
     def __get_last_modified_dict(self):
         for root, _, files in os.walk(self.__FolderPath):
             for file in files:
+                if file.endswith('~'):
+                    continue
                 file = os.path.join(root, file)
                 self.__CurrentFiles.add(file)
                 if self.__Old.get(file, 0) == 0:
                     try:
                         self.__Trigger("Create", file)
-                        self.__Old[file] = os.stat(file).st_mtime
+                        try:
+                            self.__Old[file] = os.path.getmtime(file)
+                        except FileNotFoundError:
+                            self.__Old.pop(file)
                     except Exception as e:
                         print(f"Trigger failed with {e}")
                 if self.__Old.get(file, 0) != os.path.getmtime(file):
                     try:
                         self.__Trigger("Update", file)
-                        self.__Old[file] = os.path.getmtime(file)
+                        try:
+                            self.__Old[file] = os.path.getmtime(file)
+                        except FileNotFoundError:
+                            self.__Old.pop(file)
                     except Exception as e:
                         print(f"Trigger failed with {e}")
+        if self.__PrevFiles is None:
+            self.__PrevFiles = self.__CurrentFiles
         for i in self.__PrevFiles.difference(self.__CurrentFiles):
             try:
                 self.__Trigger("Delete", i)
             except Exception as e:
                 print(f"Trigger failed with {e}")
         self.__PrevFiles = self.__CurrentFiles
+        self.__CurrentFiles = set()
+        sleep(1)
 
     def __run(self):
         while True:
@@ -64,8 +75,8 @@ class GlobalWatcher:
         self.__Thread = None
 
     def start_watcher(self, path, trigger):
-        print(f"Start watcher {path}")
-        Watcher = LocalWatcher(path, trigger)
+        print(f"Starting watcher for {path}")
+        Watcher = LocalWatcher(path, trigger, self)
         Watcher.start()
         self.__WatcherList[path] = Watcher
 

@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch
 from starlette.responses import StreamingResponse
 
 from config import Elastic_URL, FTP_BASE_PATH, Elastic_Username, Elastic_Password
-from databaseConfig import Indexes, Mapping
+from database_config import Indexes, Mapping
 from photos.core import FaceDetection
 import cv2
 

@@ -27,6 +27,14 @@ services:
   server:
     container_name: Backend
     build: backend/.
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
     depends_on:
       - elasticsearch
     ports:
@@ -38,9 +46,38 @@ services:
         ipv4_address: 10.0.0.3
     command: bash /trigger.sh elasticsearch 9200 python3.8 main.py
 
+  face_detetction:
+    container_name: FaceDetection
+    build: backend/.
+    deploy:
+        resources:
+            limits:
+              cpus: '0.75'
+              memory: 1024M
+            reservations:
+              cpus: '0.25'
+              memory: 512M
+    depends_on:
+      server:
+        condition: service_started
+    volumes:
+      - ../.:/server:rw
+    networks:
+      network:
+        ipv4_address: 10.0.0.5
+    command: bash /trigger.sh server 8000 python3.8 main_watcher.py
+
   nginx:
     container_name: Frontend
     image: nginx
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
     ports:
       - "80:80"
     volumes:

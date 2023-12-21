@@ -4,7 +4,8 @@ Indexes = {
     "Files": "files",
     "Shared": "shared",
     "Photos": "photos",
-    "Faces": "faces"
+    "Faces": "faces",
+    "Forms": "forms"
 }
 
 Mapping = {
@@ -80,5 +81,47 @@ Mapping = {
         "face_y1": {"type": "double"},
         "face_y2": {"type": "double"},
         "default_pic_path": {"type": "text"},
+    }},
+    "Forms": {"properties": {
+        "id": {"type": "keyword"},
+        "end_time": {"type": "double"},
+        "start_time": {"type": "double"},
+        "created_at": {"type": "double"},
+        "modified_at": {"type": "double"},
+        "sections_count": {"type": "integer"},
+        "section": {"type": "nested", "properties": {
+            "section_id": {"type": "integer"},
+            "questions_count": {"type": "integer"},
+            "questions": {"type": "nested", "properties": {
+                "question_id": {"type": "integer"},
+                "question": {"type": "text"},
+                "time": {"type": "double"},
+                "format": {"type": "keyword"},
+                "type": {"type": "keyword"},
+                "word_limit": {"type": "integer"},
+                "options": {"type": "nested", "properties": {
+                    "text": {"type": "keyword"},
+                    "trailing": {"type": "keyword"},
+                }}
+            }},
+            "next": {"type": "nested", "properties": {
+                "question_id": {"type": "integer"},
+                "response": {"type": "keyword"},
+            }}
+        }},
+    }},
+    "Responses": {"properties": {
+        "id": {"type": "keyword"},
+        "user_id": {"type": "keyword"},
+        "time": {"type": "double"},
+        "section": {"type": "nested", "properties": {
+            "section_id": {"type": "integer"},
+            "answer": {"type": "nested", "properties": {
+                "question_id": {"type": "integer"},
+                "response_text": {"type": "text"},
+                "response_option": {"type": "keyword"},
+                "time": {"type": "double"},
+            }},
+        }},
     }}
 }
