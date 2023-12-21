@@ -11,7 +11,7 @@ from ftp.model import FileList, Create, CreateShared
 import os
 
 from photos.model import Rename, SetVisibility, FetchDetails
-from photos.watcher import GlobalWatcher
+
 from photos.handler import PhotosHandler, Trigger, FaceHandler
 
 app = FastAPI()
@@ -297,6 +297,4 @@ async def SetVisibility(body: SetVisibility, user: str = Header()):
 
 
 if __name__ == '__main__':
-    Watcher = GlobalWatcher()
-    Watcher.start_watcher(FTP_BASE_PATH, Trigger)
     uvicorn.run(app="main:app", host="0.0.0.0", port=8000, workers=16, reload=True)
