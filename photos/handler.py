@@ -90,7 +90,7 @@ class PhotosHandler:
             self.__ES.indices.create(index=self._GetIndex(), mappings=Mapping[self.__Index])
 
     def AddFile(self, path: str, time: float):
-        if path.endswith(".jpg") or path.endswith(".jpeg") or path.endswith(".png"):
+        if path.lower().endswith(".jpg") or path.lower().endswith(".jpeg") or path.lower().endswith(".png"):
             detect = FaceDetection(self.__username, path)
             height, width = detect.GetDimension()
             path = path.replace(os.path.join(self.__FTPBasePath, self.__username), "")
@@ -185,6 +185,7 @@ class PhotosHandler:
 
 
 def Trigger(event, path):
+    print(f"{event}: {path}")
     username = [i for i in path.replace(FTP_BASE_PATH, "").split(os.path.sep) if
                 len(i) != 0 and i != ".." and i != "."][0]
     photoHandler = PhotosHandler(username, Elastic_Username, Elastic_Password)

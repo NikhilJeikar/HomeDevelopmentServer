@@ -51,17 +51,6 @@ export const UploadProgressView = ({ open, files }) => {
             {Object.keys(files).map((key, index) => (
               <ListItem
               key={index}
-                secondaryAction={
-                  files[key].progress === "started" ? (
-                    <IconButton
-                      onClick={() => {
-                        files[key].close.abort();
-                      }}
-                    >
-                      <HighlightOff />
-                    </IconButton>
-                  ) : null
-                }
               >
                 {files[key].progress === "started" ? (
                   <CircularProgress size={15} />
