@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   files: {},
-  complete: false,
+  complete: true,
 };
 
 const is_complete = (files) => {
