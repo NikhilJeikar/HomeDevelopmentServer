@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ConflictError, NotFoundError
 
 from config import Elastic_URL
-from databaseConfig import Mapping, Indexes
+from database_config import Mapping, Indexes
 from auth.model import AccountLogin
 
 import uuid

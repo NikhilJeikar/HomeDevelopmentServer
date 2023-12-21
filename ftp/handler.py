@@ -11,7 +11,7 @@ import shutil
 import uuid
 
 from config import Elastic_URL, FTP_BASE_PATH
-from databaseConfig import Indexes, Mapping
+from database_config import Indexes, Mapping
 from ftp.model import CreateShared
 
 
