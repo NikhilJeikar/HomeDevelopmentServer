@@ -5,10 +5,9 @@ from fastapi import UploadFile, File, HTTPException
 from starlette.responses import FileResponse, StreamingResponse
 
 import os
-import zipfile
-import io
 import shutil
 import uuid
+import zipfly
 
 from config import Elastic_URL, FTP_BASE_PATH
 from database_config import Indexes, Mapping
@@ -88,21 +87,12 @@ class FileHandle:
             return {"message": f"Error uploading file to {os.path.join(self.__current_path, name)}"}
 
     def SendFolder(self, name):
-        zip_bytes_io = io.BytesIO()
-        with zipfile.ZipFile(zip_bytes_io, 'w', zipfile.ZIP_DEFLATED) as zipped:
-            for root, dirs, files in os.walk(os.path.join(self.__current_path, name)):
-                zipped.write(root)
-                for filename in files:
-                    zipped.write(os.path.join(root, filename))
-
-        response = StreamingResponse(
-            iter([zip_bytes_io.getvalue()]),
-            media_type="application/x-zip-compressed",
-            headers={"Content-Disposition": f"attachment;filename={name}.zip",
-                     "Content-Length": str(zip_bytes_io.getbuffer().nbytes)}
-        )
-        zip_bytes_io.close()
-        return response
+        filenames = []
+        for root, dirs, files in os.walk(os.path.join(self.__current_path, name)):
+            for filename in files:
+                filenames.append({'fs':os.path.join(root, filename)})
+        zfly = zipfly.ZipFly(paths=filenames)
+        return StreamingResponse(zfly.generator(), status_code=200, media_type="application/zip")
 
     def __ListFiller(self, file_list):
         ret = []
@@ -111,7 +101,9 @@ class FileHandle:
                 os.path.join(self.__current_path, i[0]))["_source"]})
         return {"list": ret, "dir": os.path.sep.join(
             self.__current_path.split(os.path.sep)[len(self.__base_path.split(os.path.sep)) + 1:]),
-                "dir_list": [i for i in self.__current_path.split(os.path.sep)[len(self.__base_path.split(os.path.sep)) + 1:]if len(i) != 0 and i != '.' ]}
+                "dir_list": [i for i in self.__current_path.split(os.path.sep)[
+                                        len(self.__base_path.split(os.path.sep)) + 1:] if
+                             len(i) != 0 and i != '.']}
 
     def List(self, name=None):
         if name is None:

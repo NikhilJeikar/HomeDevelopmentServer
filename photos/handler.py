@@ -185,7 +185,7 @@ class PhotosHandler:
 
 
 def Trigger(event, path):
-    print(f"{event}: {path}")
+    print(f"{event}: {path}",flush=True)
     username = [i for i in path.replace(FTP_BASE_PATH, "").split(os.path.sep) if
                 len(i) != 0 and i != ".." and i != "."][0]
     photoHandler = PhotosHandler(username, Elastic_Username, Elastic_Password)
