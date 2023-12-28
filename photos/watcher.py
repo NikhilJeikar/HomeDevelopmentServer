@@ -23,7 +23,7 @@ class LocalWatcher:
 
     def __preserve_state(self):
         file = open(os.path.join(CACHE_BASE_PATH, self.CacheName), 'w')
-        json.dump(self.__Old, file,indent=4)
+        json.dump(self.__Old, file, indent=4)
         file.close()
 
     def __load_state(self):

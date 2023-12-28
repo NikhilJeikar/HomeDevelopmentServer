@@ -49,6 +49,7 @@ services:
   face_detetction:
     container_name: FaceDetection
     build: backend/.
+    restart: on-failure
     deploy:
         resources:
             limits:

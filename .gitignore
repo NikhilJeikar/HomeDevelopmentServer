@@ -10,3 +10,4 @@ databaseConfig.py
 
 *.pyc
 *.out
+*.log
