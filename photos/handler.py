@@ -6,6 +6,7 @@ from starlette.responses import StreamingResponse
 
 from config import Elastic_URL, FTP_BASE_PATH, Elastic_Username, Elastic_Password
 from database_config import Indexes, Mapping
+from lib.garbage_collection import ClearMemory
 from photos.core import FaceDetection
 import cv2
 
@@ -90,7 +91,8 @@ class PhotosHandler:
             self.__ES.indices.create(index=self._GetIndex(), mappings=Mapping[self.__Index])
 
     def AddFile(self, path: str, time: float):
-        if path.lower().endswith(".jpg") or path.lower().endswith(".jpeg") or path.lower().endswith(".png"):
+        if path.lower().endswith(".jpg") or path.lower().endswith(".jpeg") or path.lower().endswith(
+                ".png"):
             detect = FaceDetection(self.__username, path)
             height, width = detect.GetDimension()
             path = path.replace(os.path.join(self.__FTPBasePath, self.__username), "")
@@ -185,8 +187,10 @@ class PhotosHandler:
 
 
 def Trigger(event, path):
-    print(f"{event}: {path}",flush=True)
+    print(f"{event}: {path}", flush=True)
     username = [i for i in path.replace(FTP_BASE_PATH, "").split(os.path.sep) if
                 len(i) != 0 and i != ".." and i != "."][0]
     photoHandler = PhotosHandler(username, Elastic_Username, Elastic_Password)
     photoHandler.AddFile(path, time())
+    del photoHandler
+    ClearMemory()

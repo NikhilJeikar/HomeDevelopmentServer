@@ -1,6 +1,9 @@
 import os
 from time import sleep
 from threading import Thread
+import json
+
+from config import CACHE_BASE_PATH
 
 
 class LocalWatcher:
@@ -13,6 +16,23 @@ class LocalWatcher:
         self.__PrevFiles = None
         self.__CurrentFiles = set()
         self.__Global_Watcher = global_watcher
+        self.CacheName = "watcher.json"
+        if not os.path.exists(CACHE_BASE_PATH):
+            os.makedirs(CACHE_BASE_PATH)
+        self.__load_state()
+
+    def __preserve_state(self):
+        file = open(os.path.join(CACHE_BASE_PATH, self.CacheName), 'w')
+        json.dump(self.__Old, file,indent=4)
+        file.close()
+
+    def __load_state(self):
+        try:
+            file = open(os.path.join(CACHE_BASE_PATH, self.CacheName), 'r')
+            self.__Old = json.load(file)
+            file.close()
+        except FileNotFoundError:
+            print("Unable to load the cache")
 
     def __get_last_modified_dict(self):
         for root, _, files in os.walk(self.__FolderPath):
@@ -48,6 +68,7 @@ class LocalWatcher:
                 print(f"Trigger failed with {e}")
         self.__PrevFiles = self.__CurrentFiles
         self.__CurrentFiles = set()
+        self.__preserve_state()
         sleep(1)
 
     def __run(self):
@@ -103,6 +124,6 @@ class GlobalWatcher:
         self.__Restart = False
 
     def __del__(self):
-        for key, value in self.__WatcherList:
+        for key, value in self.__WatcherList.items():
             if value.is_alive():
                 value.kill()
