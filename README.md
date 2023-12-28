@@ -26,3 +26,8 @@ When creating a new issue, please provide detailed information, including:
 - Steps to reproduce the problem (if applicable).
 - Screenshots or error messages related to the issue.
 - Details about your environment, such as your operating system and browser versions.
+
+## To do list
+[ ] Add relative path 
+[ ] Add generalise path for the code
+[ ] Optimize the flow 
