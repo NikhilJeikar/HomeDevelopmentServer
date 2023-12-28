@@ -2,7 +2,6 @@ import face_recognition
 import numpy as np
 import uuid
 import os
-import json
 from config import PHOTOS_BASE_PATH
 
 
